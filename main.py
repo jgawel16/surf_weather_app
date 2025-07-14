@@ -11,11 +11,13 @@ load_dotenv()
 # Supabase config
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
+SUPABASE_API_KEY_SERVICE_ROLE = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
 TABLE_NAME = "sms_messages"
 
 headers = {
-    "apikey": os.getenv("SUPABASE_SERVICE_ROLE_KEY"),
-    "Authorization": f"Bearer {os.getenv('SUPABASE_SERVICE_ROLE_KEY')}",
+    "apikey": SUPABASE_API_KEY_SERVICE_ROLE,
+    "Authorization": f"Bearer {SUPABASE_API_KEY_SERVICE_ROLE}",
     "Content-Type": "application/json",
     "Prefer": "return=representation"
 }

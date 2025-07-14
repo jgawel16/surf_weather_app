@@ -70,10 +70,13 @@ def update_row(row_id, new_value):
     return r.json()
 
 # Pipeline
-def create_body_processed():
+def main():
     new_records = get_rows()
     
     for row in new_records:
         row["body_processed"] = groq_process_text(row["body"])
         update_row(row["id"], row["body_processed"])
         print(f"Updated row {row['id']}: {row['body_processed']}")
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Surfweer (laatste update)</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 2rem; }
+      .wrap { max-width: 800px; margin: 0 auto; }
+      .row { display: flex; gap: .5rem; align-items: center; margin-bottom: .75rem; }
+      textarea { width: 100%; min-height: 320px; padding: .75rem; border-radius: 10px; }
+      .status { font-size: .9rem; opacity: .8; }
+      button { padding: .5rem .8rem; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Surfweer – meest actuele bericht</h1>
+      <div class="row">
+        <button id="refresh">Verversen</button>
+        <span id="status" class="status"></span>
+      </div>
+      <textarea id="out" readonly placeholder="Nog geen data…"></textarea>
+    </div>
+
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="./config.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

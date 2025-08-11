@@ -23,7 +23,6 @@ function setStatus(msg, isError=false){
 }
 
 function makeCard({ timestamp, body_processed }){
-  // We hebben één kaart, met placeholders voor score/golf/periode/wind
   const card = document.createElement("article");
   card.className = "card";
   card.innerHTML = `
@@ -32,21 +31,15 @@ function makeCard({ timestamp, body_processed }){
         <span>Laatste bericht</span>
         <span class="dt">• ${timestamp ? new Date(timestamp).toLocaleString() : "onbekend"}</span>
       </div>
-      <div class="score">—/10</div>
-      <div class="height">—</div>
-      <div class="period">—</div>
       <div class="wind"><span class="chip">—</span></div>
     </div>
     <div class="card-bd"><pre>${(body_processed ?? "").trim() || "(leeg)"}</pre></div>
   `;
-
-  // accordion gedrag
   const hd = card.querySelector(".card-hd");
   hd.addEventListener("click", () => {
     const isOpen = card.classList.toggle("open");
     hd.setAttribute("aria-expanded", isOpen ? "true" : "false");
   });
-
   return card;
 }
 

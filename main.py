@@ -112,12 +112,17 @@ def groq_process_text(text):
     - Voeg geen extra context, uitleg of mening toe.
     - Output moet uitsluitend een JSON-array zijn met bovenstaande velden in exact deze volgorde.
     
-    Invoer:
-    <{text}>
+    Uitvoervereiste:
+    - Geef uitsluitend de JSON-array terug.
+    - Voeg geen inleidende tekst, verklaringen, tussenstappen of extra output toe. Alleen de array.
     
     Uitvoer:
     [JSON-array met gestructureerde gegevens]
+
+    Invoer:
+    <{text}>
     """
+    
     chat_completion = client.chat.completions.create(
     messages=[
         {

@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Surf Forecast</title>
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+  :root{
+    --bg:#f3f7fb; --card:#fff; --bd:#e6eef5; --fg:#16324f; --muted:#6b88a4;
+    --accent:#3aa0ff; --accent2:#5fd3c6; --chip:#ffd54a; --chip-fg:#1f2a37;
+    --shadow:0 10px 24px rgba(22,50,79,.08);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0e1620; --card:#111a24; --bd:#1c2a3a; --fg:#e7eff7; --muted:#9fb4c9; --shadow:0 10px 24px rgba(0,0,0,.35); }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    background:var(--bg); color:var(--fg);
+  }
+
+  /* Hero */
+  .hero{ background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; padding:32px 20px 72px;}
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 24px;}
+  .brand{ display:flex; align-items:center; gap:14px}
+  .brand h1{margin:0; font-size:26px}
+  .brand .sub{opacity:.9; font-size:14px}
+
+  /* Sectie */
+  .section{ margin:-48px auto 56px; max-width:1200px; padding:0 24px;}
+
+  /* Locatie blok */
+  .location{
+    background:var(--card); border:1px solid var(--bd); border-radius:calc(var(--radius) + 2px);
+    box-shadow:var(--shadow); margin-bottom:28px; overflow:hidden;
+  }
+  .location-hd{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 22px; border-bottom:1px solid var(--bd);
+  }
+  .location-title{ font-weight:800; font-size:20px; letter-spacing:.2px; }
+  .hint{ color:var(--muted); font-size:13px; }
+
+  /* Dagen: altijd horizontaal scrollbaar */
+  .days{
+    padding: 18px;
+    display: grid;
+    grid-auto-flow: column;                 /* horizontaal */
+    grid-auto-columns: minmax(260px, 1fr);  /* vaste min-breedte per dag */
+    gap: 18px;
+
+    overflow-x: auto;                       /* altijd scrollbaar */
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .days::after{ content:""; width:12px; }   /* ademruimte rechts */
+
+  /* Dag-kolom */
+  .day{
+    background:var(--card); border:1px solid var(--bd); border-radius:12px;
+    padding:14px; scroll-snap-align:start;
+    display:flex; flex-direction:column; gap:14px;
+    min-height: 100%;
+    min-width: 260px;                       /* matcht grid-auto-columns */
+  }
+  .day-hd{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding-bottom:8px; border-bottom:1px dashed var(--bd);
+  }
+  .d-title{ font-weight:800; }
+  .d-sub{ color:var(--muted); font-size:12px; margin-top:2px; }
+  .score{ width:40px; height:40px; border-radius:999px; display:grid; place-items:center;
+          background:var(--chip); color:var(--chip-fg); font-weight:800; }
+
+  /* Dagdelen-stack */
+  .parts{ display:flex; flex-direction:column; gap:12px; }
+  .part{
+    border:1px solid var(--bd); border-radius:12px; padding:12px;
+    display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    background:var(--card);
+  }
+  .p-name{ grid-column:1 / -1; font-weight:700; }
+  .kv{ font-size:13px; color:var(--muted); }
+  .kv b{ display:block; color:var(--fg); font-size:14px; }
+
+  /* Toolbar (status + refresh) */
+  .toolbar{ display:flex; gap:12px; align-items:center; margin: -28px 24px 12px; }
+  .status{ color:var(--muted); font-size:14px; }
+  .error{ color:#b00020; }
+  .btn{ border:1px solid var(--bd); background:var(--card); color:var(--fg);
+        padding:8px 12px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow); }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+          <rect width="64" height="64" rx="12" fill="#fff" opacity=".9"/>
+          <path d="M8 44c6-6 14-6 20 0 6 6 14 6 20 0 6-6 14-6 20 0" fill="none" stroke="#3aa0ff" stroke-width="6" stroke-linecap="round"/>
+          <ellipse cx="32" cy="28" rx="4" ry="16" fill="#ffcc66" stroke="#d9a441" stroke-width="1.5" transform="rotate(-25 32 28)"/>
+        </svg>
+        <div>
+          <h1>Surf Forecast</h1>
+          <div class="sub">7-daagse voorspelling per locatie</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap toolbar">
+    <button id="refresh" class="btn">Verversen</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <main class="section wrap" id="app"></main>
+
+<!-- Supabase + config -->
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  import { SUPABASE_URL, SUPABASE_ANON_KEY, AUTO_REFRESH_MINUTES } from "./config.js";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+
+  const $app = document.querySelector("#app");
+  const $status = document.querySelector("#status");
+  const setStatus = (msg, err=false) => {
+    $status.textContent = msg || "";
+    $status.className = "status" + (err ? " error" : "");
+  };
+
+  // --- helpers ---
+  const get = (obj, ...cands) => {
+    const norm = Object.fromEntries(Object.entries(obj||{}).map(([k,v]) => [k.trim().toLowerCase(), v]));
+    for (const c of cands) {
+      const k = String(c).trim().toLowerCase();
+      if (k in norm && norm[k] != null && norm[k] !== "") return norm[k];
+    }
+    return null;
+  };
+  const weekdayShort = (d) => ["Zo","Ma","Di","Wo","Do","Vr","Za"][d.getDay()];
+  const fmtNL = (iso) => {
+    const d = new Date(iso);
+    return `${d.toLocaleDateString("nl-NL",{ weekday:"short" })} ${String(d.getDate()).padStart(2,"0")} ${d.toLocaleDateString("nl-NL",{ month:"short" })}`;
+  };
+
+  function buildModel(rows){
+    const byLoc = new Map();
+    for (const r of rows){
+      const locatie   = get(r,"Locatie") || "Onbekend";
+      const datumISO  = get(r,"Datum");
+      if (!datumISO) continue;
+
+      const dagLabel  = get(r,"Dag") || weekdayShort(new Date(datumISO));
+      const dagdeel   = get(r,"Dagdeel") || "Algemeen";
+      const wind      = get(r,"Wind");
+      const windR     = get(r,"Wind richting");
+      const getij     = get(r,"Getij","Getij ");
+      const getijScore= get(r,"Getij score");
+      const hoogte    = get(r,"Golf hoogte");
+      const periode   = get(r,"Periode");
+      const adviesPro = get(r,"Gaan Pro");
+      const adviesBeg = get(r,"Gaan beginner");
+
+      if (!byLoc.has(locatie)) byLoc.set(locatie, new Map());
+      const daysMap = byLoc.get(locatie);
+      if (!daysMap.has(datumISO)) {
+        daysMap.set(datumISO, { label: dagLabel, datum: new Date(datumISO), parts: [] });
+      }
+      daysMap.get(datumISO).parts.push({
+        name: dagdeel,
+        hoogte: hoogte ?? "—",
+        periode: periode ?? "—",
+        wind: [wind, windR].filter(Boolean).join(" ") || "—",
+        getij: [getij, getijScore].filter(Boolean).join(" ") || (getij ?? "—"),
+        adviesPro: adviesPro ?? null,
+        adviesBeg: adviesBeg ?? null,
+        score: null
+      });
+    }
+
+    const model = [];
+    for (const [loc, daysMap] of byLoc){
+      const days = Array.from(daysMap.entries())
+        .sort((a,b) => a[0].localeCompare(b[0]))
+        .map(([iso, day]) => ({
+          label: day.label,
+          datum: fmtNL(iso),
+          dayScore: null,
+          parts: day.parts
+        }));
+      model.push({ locatie: loc, days });
+    }
+    return model;
+  }
+
+  // --- render ---
+  function Part(p){
+    const el = document.createElement("div");
+    el.className = "part";
+    el.innerHTML = `
+      <div class="p-name">${p.name}</div>
+      <div class="kv">Golfhoogte<b>${p.hoogte}</b></div>
+      <div class="kv">Swell Periode<b>${p.periode}</b></div>
+      <div class="kv">Wind<b>${p.wind}</b></div>
+      <div class="kv">Getij<b>${p.getij}</b></div>
+      ${p.adviesPro ? `<div class="kv" style="grid-column:1/-1"><span>Advies (Pro)</span><b>${p.adviesPro}</b></div>` : ""}
+      ${p.adviesBeg ? `<div class="kv" style="grid-column:1/-1"><span>Advies (Beginner)</span><b>${p.adviesBeg}</b></div>` : ""}
+    `;
+    return el;
+  }
+
+  function DayCol(d){
+    const el = document.createElement("div");
+    el.className = "day";
+    el.innerHTML = `
+      <div class="day-hd">
+        <div>
+          <div class="d-title">${d.label}</div>
+          <div class="d-sub">${d.datum}</div>
+        </div>
+        ${d.dayScore != null ? `<div class="score">${d.dayScore}/10</div>` : `<div style="width:40px;height:40px"></div>`}
+      </div>
+      <div class="parts"></div>
+    `;
+    const parts = el.querySelector(".parts");
+    d.parts.forEach(p => parts.appendChild(Part(p)));
+    return el;
+  }
+
+  function LocationBlock(loc){
+    const box = document.createElement("section");
+    box.className = "location";
+    box.innerHTML = `
+      <div class="location-hd">
+        <div class="location-title">${loc.locatie}</div>
+        <div class="hint">7-daagse weergave</div>
+      </div>
+      <div class="days"></div>
+    `;
+    const days = box.querySelector(".days");
+    loc.days.forEach(d => days.appendChild(DayCol(d)));
+    return box;
+  }
+
+  function render(model){
+    const $root = document.querySelector("#app");
+    $root.innerHTML = "";
+    model.forEach(loc => $root.appendChild(LocationBlock(loc)));
+  }
+
+  // --- data ophalen ---
+  async function fetchLatestJSON(){
+    const { data, error } = await supabase.rpc("get_latest_sms");
+    if (error) throw error;
+    const row = Array.isArray(data) && data.length ? data[0] : null;
+    if (!row?.body_processed) throw new Error("Geen body_processed gevonden.");
+    let parsed;
+    try { parsed = JSON.parse(row.body_processed); }
+    catch { throw new Error("Kon body_processed niet als JSON parsen."); }
+    if (!Array.isArray(parsed)) throw new Error("JSON is geen array.");
+    return parsed;
+  }
+
+  async function load(){
+    try{
+      setStatus("Laden…");
+      const rows = await fetchLatestJSON();
+      const model = buildModel(rows);
+      render(model);
+      setStatus(`Laatst ververst: ${new Date().toLocaleTimeString()}`);
+    }catch(e){
+      console.error(e);
+      setStatus(`Fout: ${e.message}`, true);
+    }
+  }
+
+  document.querySelector("#refresh").addEventListener("click", load);
+  load();
+
+  if (AUTO_REFRESH_MINUTES && Number(AUTO_REFRESH_MINUTES) > 0){
+    setInterval(load, Number(AUTO_REFRESH_MINUTES) * 60 * 1000);
+  }
+</script>
+</body>
+</html>

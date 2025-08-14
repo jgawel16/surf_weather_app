@@ -44,7 +44,7 @@
   .location-title{ font-weight:800; font-size:20px; letter-spacing:.2px; }
   .hint{ color:var(--muted); font-size:13px; }
 
-  /* Dagen-grid: horizontaal scroll op mobiel, 7 kolommen op brede schermen */
+  /* Dagen: altijd horizontaal scrollbaar */
   .days{
     padding: 18px;
     display: grid;
@@ -57,19 +57,15 @@
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
   }
+  .days::after{ content:""; width:12px; }   /* ademruimte rechts */
 
-  .days::after{
-    content:"";
-    width:12px;   /* extra ademruimte rechts */
-  }
-  
   /* Dag-kolom */
   .day{
     background:var(--card); border:1px solid var(--bd); border-radius:12px;
     padding:14px; scroll-snap-align:start;
     display:flex; flex-direction:column; gap:14px;
     min-height: 100%;
-    min-width: 260px;   /* matcht grid-auto-columns */
+    min-width: 260px;                       /* matcht grid-auto-columns */
   }
   .day-hd{
     display:flex; justify-content:space-between; align-items:center; gap:10px;
@@ -91,10 +87,12 @@
   .kv{ font-size:13px; color:var(--muted); }
   .kv b{ display:block; color:var(--fg); font-size:14px; }
 
-  /* Buttons */
+  /* Toolbar (status + refresh) */
+  .toolbar{ display:flex; gap:12px; align-items:center; margin: -28px 24px 12px; }
+  .status{ color:var(--muted); font-size:14px; }
+  .error{ color:#b00020; }
   .btn{ border:1px solid var(--bd); background:var(--card); color:var(--fg);
         padding:8px 12px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow); }
-  .btn:hover{ filter:brightness(1.02); }
 </style>
 </head>
 <body>
@@ -114,118 +112,179 @@
     </div>
   </header>
 
+  <div class="wrap toolbar">
+    <button id="refresh" class="btn">Verversen</button>
+    <span class="status" id="status"></span>
+  </div>
+
   <main class="section wrap" id="app"></main>
 
-<script>
-/*
-Data-structuur (per locatie → dagen → dagdelen):
-- 7 dagen per locatie (kolommen).
-- Binnen elke dag 1..n dagdelen (Ochtend/Middag/Avond), onder elkaar.
-- Elke dag heeft een "dayScore" (gemiddelde of headline), getoond in de gele cirkel.
-*/
-const demo = [
-  {
-    locatie: "Scheveningen",
-    days: [
-      {
-        label:"Vandaag", datum:"vr 09 aug", dayScore:7,
-        parts:[
-          { name:"Ochtend",  hoogte:"1.6 m", periode:"14 s", wind:"S ↘", getij:"Agaand (3.7 m)", score:5 },
-          { name:"Middag",   hoogte:"1.4 m", periode:"13 s", wind:"S ↘", getij:"Dood",            score:8 },
-          { name:"Avond",    hoogte:"1.2 m", periode:"12 s", wind:"SSW ↘", getij:"Laag",         score:6 },
-        ]
-      },
-      {
-        label:"Za", datum:"za 10 aug", dayScore:7,
-        parts:[
-          { name:"Ochtend",  hoogte:"1.1 m", periode:"11 s", wind:"W",   getij:"Stijgend", score:7 },
-          { name:"Middag",   hoogte:"1.0 m", periode:"10 s", wind:"WNW", getij:"Hoog",     score:6 },
-        ]
-      },
-      {
-        label:"Zo", datum:"zo 11 aug", dayScore:8,
-        parts:[
-          { name:"Ochtend",  hoogte:"1.4 m", periode:"13 s", wind:"NW", getij:"Agaand", score:8 },
-          { name:"Middag",   hoogte:"1.2 m", periode:"12 s", wind:"NW", getij:"Dood",   score:7 },
-        ]
-      },
-      { label:"Ma", datum:"ma 12 aug", dayScore:6, parts:[ { name:"Ochtend", hoogte:"0.9 m", periode:"10 s", wind:"WNW", getij:"Laag", score:6 } ] },
-      { label:"Di", datum:"di 13 aug", dayScore:6, parts:[ { name:"Middag",  hoogte:"1.0 m", periode:"9 s",  wind:"W",   getij:"Stijgend", score:6 } ] },
-      { label:"Wo", datum:"wo 14 aug", dayScore:7, parts:[ { name:"Ochtend", hoogte:"1.1 m", periode:"10 s", wind:"WNW", getij:"Hoog", score:7 } ] },
-      { label:"Do", datum:"do 15 aug", dayScore:5, parts:[ { name:"Avond",   hoogte:"0.8 m", periode:"8 s",  wind:"S",   getij:"Laag", score:5 } ] },
-    ]
-  },
-  {
-    locatie: "Blankenberge",
-    days: [
-      {
-        label:"Vandaag", datum:"vr 09 aug", dayScore:7,
-        parts:[
-          { name:"Ochtend",  hoogte:"1.3 m", periode:"12 s", wind:"S",   getij:"Agaand", score:6 },
-          { name:"Middag",   hoogte:"1.2 m", periode:"12 s", wind:"SSW", getij:"Hoog",   score:7 },
-          { name:"Avond",    hoogte:"1.0 m", periode:"11 s", wind:"W",   getij:"Laag",   score:6 },
-        ]
-      },
-      { label:"Za", datum:"za 10 aug", dayScore:7, parts:[ { name:"Ochtend", hoogte:"1.1 m", periode:"11 s", wind:"WNW", getij:"Stijgend", score:7 } ] },
-      { label:"Zo", datum:"zo 11 aug", dayScore:7, parts:[ { name:"Ochtend", hoogte:"1.2 m", periode:"12 s", wind:"NW",  getij:"Agaand",   score:7 } ] },
-      { label:"Ma", datum:"ma 12 aug", dayScore:6, parts:[ { name:"Middag",  hoogte:"1.0 m", periode:"10 s", wind:"W",   getij:"Hoog",     score:6 } ] },
-      { label:"Di", datum:"di 13 aug", dayScore:6, parts:[ { name:"Ochtend", hoogte:"0.9 m", periode:"9 s",  wind:"WNW", getij:"Laag",     score:6 } ] },
-      { label:"Wo", datum:"wo 14 aug", dayScore:7, parts:[ { name:"Middag",  hoogte:"1.1 m", periode:"10 s", wind:"WNW", getij:"Stijgend", score:7 } ] },
-      { label:"Do", datum:"do 15 aug", dayScore:6, parts:[ { name:"Avond",   hoogte:"0.8 m", periode:"8 s",  wind:"S",   getij:"Laag",     score:6 } ] },
-    ]
+<!-- Supabase + config -->
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  import { SUPABASE_URL, SUPABASE_ANON_KEY, AUTO_REFRESH_MINUTES } from "./config.js";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+
+  const $app = document.querySelector("#app");
+  const $status = document.querySelector("#status");
+  const setStatus = (msg, err=false) => {
+    $status.textContent = msg || "";
+    $status.className = "status" + (err ? " error" : "");
+  };
+
+  // --- helpers ---
+  const get = (obj, ...cands) => {
+    const norm = Object.fromEntries(Object.entries(obj||{}).map(([k,v]) => [k.trim().toLowerCase(), v]));
+    for (const c of cands) {
+      const k = String(c).trim().toLowerCase();
+      if (k in norm && norm[k] != null && norm[k] !== "") return norm[k];
+    }
+    return null;
+  };
+  const weekdayShort = (d) => ["Zo","Ma","Di","Wo","Do","Vr","Za"][d.getDay()];
+  const fmtNL = (iso) => {
+    const d = new Date(iso);
+    return `${d.toLocaleDateString("nl-NL",{ weekday:"short" })} ${String(d.getDate()).padStart(2,"0")} ${d.toLocaleDateString("nl-NL",{ month:"short" })}`;
+  };
+
+  function buildModel(rows){
+    const byLoc = new Map();
+    for (const r of rows){
+      const locatie   = get(r,"Locatie") || "Onbekend";
+      const datumISO  = get(r,"Datum");
+      if (!datumISO) continue;
+
+      const dagLabel  = get(r,"Dag") || weekdayShort(new Date(datumISO));
+      const dagdeel   = get(r,"Dagdeel") || "Algemeen";
+      const wind      = get(r,"Wind");
+      const windR     = get(r,"Wind richting");
+      const getij     = get(r,"Getij","Getij ");
+      const getijScore= get(r,"Getij score");
+      const hoogte    = get(r,"Golf hoogte");
+      const periode   = get(r,"Periode");
+      const adviesPro = get(r,"Gaan Pro");
+      const adviesBeg = get(r,"Gaan beginner");
+
+      if (!byLoc.has(locatie)) byLoc.set(locatie, new Map());
+      const daysMap = byLoc.get(locatie);
+      if (!daysMap.has(datumISO)) {
+        daysMap.set(datumISO, { label: dagLabel, datum: new Date(datumISO), parts: [] });
+      }
+      daysMap.get(datumISO).parts.push({
+        name: dagdeel,
+        hoogte: hoogte ?? "—",
+        periode: periode ?? "—",
+        wind: [wind, windR].filter(Boolean).join(" ") || "—",
+        getij: [getij, getijScore].filter(Boolean).join(" ") || (getij ?? "—"),
+        adviesPro: adviesPro ?? null,
+        adviesBeg: adviesBeg ?? null,
+        score: null
+      });
+    }
+
+    const model = [];
+    for (const [loc, daysMap] of byLoc){
+      const days = Array.from(daysMap.entries())
+        .sort((a,b) => a[0].localeCompare(b[0]))
+        .map(([iso, day]) => ({
+          label: day.label,
+          datum: fmtNL(iso),
+          dayScore: null,
+          parts: day.parts
+        }));
+      model.push({ locatie: loc, days });
+    }
+    return model;
   }
-];
 
-/* ---------- Render ---------- */
-const $app = document.querySelector("#app");
+  // --- render ---
+  function Part(p){
+    const el = document.createElement("div");
+    el.className = "part";
+    el.innerHTML = `
+      <div class="p-name">${p.name}</div>
+      <div class="kv">Golfhoogte<b>${p.hoogte}</b></div>
+      <div class="kv">Swell Periode<b>${p.periode}</b></div>
+      <div class="kv">Wind<b>${p.wind}</b></div>
+      <div class="kv">Getij<b>${p.getij}</b></div>
+      ${p.adviesPro ? `<div class="kv" style="grid-column:1/-1"><span>Advies (Pro)</span><b>${p.adviesPro}</b></div>` : ""}
+      ${p.adviesBeg ? `<div class="kv" style="grid-column:1/-1"><span>Advies (Beginner)</span><b>${p.adviesBeg}</b></div>` : ""}
+    `;
+    return el;
+  }
 
-function Part(p){
-  const el = document.createElement("div");
-  el.className = "part";
-  el.innerHTML = `
-    <div class="p-name">${p.name}</div>
-    <div class="kv">Golfhoogte<b>${p.hoogte}</b></div>
-    <div class="kv">Swell Periode<b>${p.periode}</b></div>
-    <div class="kv">Wind<b>${p.wind}</b></div>
-    <div class="kv">Getij<b>${p.getij}</b></div>
-  `;
-  return el;
-}
-
-function DayCol(d){
-  const el = document.createElement("div");
-  el.className = "day";
-  el.innerHTML = `
-    <div class="day-hd">
-      <div>
-        <div class="d-title">${d.label}</div>
-        <div class="d-sub">${d.datum}</div>
+  function DayCol(d){
+    const el = document.createElement("div");
+    el.className = "day";
+    el.innerHTML = `
+      <div class="day-hd">
+        <div>
+          <div class="d-title">${d.label}</div>
+          <div class="d-sub">${d.datum}</div>
+        </div>
+        ${d.dayScore != null ? `<div class="score">${d.dayScore}/10</div>` : `<div style="width:40px;height:40px"></div>`}
       </div>
-      <div class="score" title="Dagscore">${d.dayScore}/10</div>
-    </div>
-    <div class="parts"></div>
-  `;
-  const parts = el.querySelector(".parts");
-  d.parts.forEach(p => parts.appendChild(Part(p)));
-  return el;
-}
+      <div class="parts"></div>
+    `;
+    const parts = el.querySelector(".parts");
+    d.parts.forEach(p => parts.appendChild(Part(p)));
+    return el;
+  }
 
-function LocationBlock(loc){
-  const box = document.createElement("section");
-  box.className = "location";
-  box.innerHTML = `
-    <div class="location-hd">
-      <div class="location-title">${loc.locatie}</div>
-      <div class="hint">7-daagse weergave</div>
-    </div>
-    <div class="days"></div>
-  `;
-  const days = box.querySelector(".days");
-  loc.days.forEach(d => days.appendChild(DayCol(d)));
-  return box;
-}
+  function LocationBlock(loc){
+    const box = document.createElement("section");
+    box.className = "location";
+    box.innerHTML = `
+      <div class="location-hd">
+        <div class="location-title">${loc.locatie}</div>
+        <div class="hint">7-daagse weergave</div>
+      </div>
+      <div class="days"></div>
+    `;
+    const days = box.querySelector(".days");
+    loc.days.forEach(d => days.appendChild(DayCol(d)));
+    return box;
+  }
 
-demo.forEach(loc => $app.appendChild(LocationBlock(loc)));
+  function render(model){
+    const $root = document.querySelector("#app");
+    $root.innerHTML = "";
+    model.forEach(loc => $root.appendChild(LocationBlock(loc)));
+  }
+
+  // --- data ophalen ---
+  async function fetchLatestJSON(){
+    const { data, error } = await supabase.rpc("get_latest_sms");
+    if (error) throw error;
+    const row = Array.isArray(data) && data.length ? data[0] : null;
+    if (!row?.body_processed) throw new Error("Geen body_processed gevonden.");
+    let parsed;
+    try { parsed = JSON.parse(row.body_processed); }
+    catch { throw new Error("Kon body_processed niet als JSON parsen."); }
+    if (!Array.isArray(parsed)) throw new Error("JSON is geen array.");
+    return parsed;
+  }
+
+  async function load(){
+    try{
+      setStatus("Laden…");
+      const rows = await fetchLatestJSON();
+      const model = buildModel(rows);
+      render(model);
+      setStatus(`Laatst ververst: ${new Date().toLocaleTimeString()}`);
+    }catch(e){
+      console.error(e);
+      setStatus(`Fout: ${e.message}`, true);
+    }
+  }
+
+  document.querySelector("#refresh").addEventListener("click", load);
+  load();
+
+  if (AUTO_REFRESH_MINUTES && Number(AUTO_REFRESH_MINUTES) > 0){
+    setInterval(load, Number(AUTO_REFRESH_MINUTES) * 60 * 1000);
+  }
 </script>
 </body>
 </html>

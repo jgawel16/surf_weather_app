@@ -47,18 +47,18 @@ def get_rows():
 # Process sms text
 def groq_process_text(text):
     prompt = f"""
-    Je krijgt hieronder een informeel geschreven surfweerbericht in het Nederlands. 
-    De tekst bevat afkortingen, spreektaal en losse zinnen, maar bevat belangrijke informatie 
+    Je krijgt hieronder een informeel geschreven surfweerbericht in het Nederlands.
+    De tekst bevat afkortingen, spreektaal en losse zinnen, maar bevat belangrijke informatie
     over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België.
     
-    Je taak: Zet deze informatie om naar een gestructureerde JSON-array met de opgegeven velden, 
-    maar voordat je de JSON maakt, doorloop je eerst een bundelstap per locatie zodat informatie 
+    Je taak: Zet deze informatie om naar een gestructureerde JSON-array met de opgegeven velden,
+    maar voordat je de JSON maakt, doorloop je eerst een bundelstap per locatie zodat informatie
     op verschillende niveaus (regio ↔ specifieke spot) correct wordt gecombineerd.
     
     Stap 1 — Uitspraken identificeren
-    - Splits de tekst in losse uitspraken die concrete gegevens bevatten over surfcondities 
+    - Splits de tekst in losse uitspraken die concrete gegevens bevatten over surfcondities
       (wind, tij, golfhoogte, clean, tijden, swell, etc.).
-    - Noteer bij elke uitspraak: Locatie(s), Dag, Dagdeel (indien genoemd), en de exacte parameters 
+    - Noteer bij elke uitspraak: Locatie(s), Dag, Dagdeel (indien genoemd), en de exacte parameters
       zoals in de tekst.
     - Behoud de tekst exact zoals vermeld; maak geen interpretaties.
     
@@ -69,7 +69,7 @@ def groq_process_text(text):
       - Zeeland: Domburg, Cadzand
       - Wadden: Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
       - België: Belgische spots
-    - Als een uitspraak over een hoofdlocatie gaat, koppel deze ook aan alle sublocaties, tenzij de 
+    - Als een uitspraak over een hoofdlocatie gaat, koppel deze ook aan alle sublocaties, tenzij de
       tekst expliciet zegt dat de uitspraak niet voor een sublocatie geldt.
     
     Stap 3 — Bundelen per locatie
@@ -77,9 +77,18 @@ def groq_process_text(text):
     - Algemene uitspraken gelden als basis; specifieke (dagdeel/tijd) uitspraken vullen deze aan.
     - Tegenstrijdige uitspraken noteer je in aparte records (met verschillend dagdeel of tijd).
     
-    Stap 4 — Vul de JSON-array
+    Stap 4 — Datum bepalen
+    - Normaal gebruik je uitsluitend informatie die letterlijk in de tekst staat.
+    - ENIGE UITZONDERING: als er géén expliciete datum wordt genoemd maar wél een dag (bijv. "maandag"),
+      bepaal dan de datum als de eerstvolgende kalenderdatum met die dag, relatief ten opzichte van
+      vandaag (op uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
+      - Voorbeeld (gegeven dat vandaag 2025-08-14 is): "maandag" ⇒ 2025-08-18.
+      - Dagnamen (NL): maandag, dinsdag, woensdag, donderdag, vrijdag, zaterdag, zondag.
+    - Noteer de datum in ISO-formaat YYYY-MM-DD.
+    
+    Stap 5 — Vul de JSON-array
     Maak voor elke unieke combinatie van Datum + Locatie + Dagdeel een JSON-object met exact deze velden in deze volgorde:
-    1. "Datum" — ISO-formaat YYYY-MM-DD (alleen invullen als expliciet genoemd of ondubbelzinnig af te leiden)
+    1. "Datum" — ISO-formaat YYYY-MM-DD (expliciet genoemd of afgeleid via Stap 4)
     2. "Dag" — bijvoorbeeld "Dinsdag", "Woensdag"
     3. "Locatie" — exacte naam uit de tekst (of sublocatie volgens hiërarchie)
     4. "Dagdeel" — bijvoorbeeld "Ochtend", "Middag", "Avond" (alleen als expliciet genoemd)
@@ -95,8 +104,8 @@ def groq_process_text(text):
     14. "Gaan beginner" — idem voor beginners
     
     Regels:
-    - Gebruik uitsluitend informatie die letterlijk in de tekst staat.
-    - Geen aannames of interpretaties toevoegen.
+    - Gebruik uitsluitend informatie die letterlijk in de tekst staat, met uitzondering van de datum-afleiding in Stap 4.
+    - Geen verdere aannames of interpretaties toevoegen.
     - Als een veld niet wordt genoemd: waarde = null.
     - Splits records per locatie én per dagdeel.
     - Neem tekstwaarden exact over, inclusief afkortingen, spaties en leestekens.

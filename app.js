@@ -162,24 +162,25 @@ function render(model){
 /* ==== Data ophalen + verwerken ==== */
 
 async function fetchLatestJSON() {
-  // Haal de laatste rij op (body_processed bevat de JSON-string)
   const { data, error } = await supabase.rpc("get_latest_sms_public");
   if (error) throw error;
 
   const row = Array.isArray(data) && data.length ? data[0] : null;
-  if (!row || !row.body_processed) throw new Error("Geen body_processed gevonden.");
-
-  // Probeer JSON te parsen
-  let parsed;
-  try {
-    parsed = JSON.parse(row.body_processed);
-  } catch (e) {
-    console.error("JSON parse error:", e);
-    throw new Error("Kon body_processed niet als JSON parsen.");
+  if (!row || row.body_processed == null) {
+    throw new Error("Geen body_processed gevonden.");
   }
-  if (!Array.isArray(parsed)) throw new Error("JSON is geen array.");
 
-  return parsed;
+  const payload = row.body_processed;
+  if (typeof payload === "string") {
+    // body_processed is text -> parse
+    const parsed = JSON.parse(payload);
+    if (!Array.isArray(parsed)) throw new Error("JSON is geen array.");
+    return parsed;
+  } else {
+    // body_processed is jsonb -> al object
+    if (!Array.isArray(payload)) throw new Error("JSON is geen array.");
+    return payload;
+  }
 }
 
 async function load() {

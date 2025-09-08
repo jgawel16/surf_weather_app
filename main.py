@@ -96,7 +96,7 @@ def groq_process_text(text):
     - Noteer de datum in ISO-formaat YYYY-MM-DD.
     
     Stap 5 — Vul de JSON-array
-    Maak voor elke unieke combinatie van Datum + Locatie + Dagdeel een JSON-object met exact deze velden in deze volgorde:
+    Maak voor elke unieke combinatie van Datum + Locatie + Dagdeel een JSON-object met exact deze velden, en in exact deze volgorde:
     1. "Datum" — ISO-formaat YYYY-MM-DD (expliciet genoemd of afgeleid via Stap 4)
     2. "Dag" — bijvoorbeeld "Dinsdag", "Woensdag"
     3. "Locatie" — exacte naam uit de tekst (of sublocatie volgens hiërarchie)

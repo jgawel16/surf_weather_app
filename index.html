@@ -255,7 +255,7 @@
 
   // --- data ophalen ---
   async function fetchLatestJSON(){
-    const { data, error } = await supabase.rpc("get_latest_sms");
+    const { data, error } = await supabase.rpc("get_latest_sms_public");
     if (error) throw error;
     const row = Array.isArray(data) && data.length ? data[0] : null;
     if (!row?.body_processed) throw new Error("Geen body_processed gevonden.");

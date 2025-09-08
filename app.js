@@ -163,7 +163,7 @@ function render(model){
 
 async function fetchLatestJSON() {
   // Haal de laatste rij op (body_processed bevat de JSON-string)
-  const { data, error } = await supabase.rpc("get_latest_sms");
+  const { data, error } = await supabase.rpc("get_latest_sms_public");
   if (error) throw error;
 
   const row = Array.isArray(data) && data.length ? data[0] : null;

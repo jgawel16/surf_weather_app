@@ -120,6 +120,14 @@ def groq_process_text(text):
     - Neem tekstwaarden exact over, inclusief afkortingen, spaties en leestekens.
     - Voeg geen extra context, uitleg of mening toe.
     - Output moet uitsluitend een JSON-array zijn met bovenstaande velden in exact deze volgorde.
+
+    **Stap 6 — Validatie en correctie**
+    - Controleer vóór het teruggeven van de output of:
+      1. Alle vereiste velden aanwezig zijn in elk object.
+      2. De volgorde van de velden exact gelijk is aan de volgorde die vermeld staat in Stap 5.
+      3. Er geen extra velden aanwezig zijn.
+      4. De output een geldige JSON-array is.
+    - Indien één van deze checks faalt, corrigeer dan de output automatisch zodat deze volledig voldoet.
     
     Uitvoervereiste:
     - Geef uitsluitend de JSON-array terug.

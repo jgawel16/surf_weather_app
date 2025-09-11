@@ -275,15 +275,17 @@
       return all;
     }
 
-    // UI pieces
+    // UI pieces 
     return React.createElement('div', { className: 'space-y-6' },
       // header
       React.createElement('header', { className: 'flex items-center justify-between' },
         React.createElement('div', { className: 'flex items-center gap-4' },
-          React.createElement('div', { className: 'w-12 h-12 rounded flex items-center justify-center border', style: { background: 'linear-gradient(180deg, white, #faf5ff)' } },
-            // logo placeholder (centered)
-            React.createElement('div', { style: { color: 'var(--accent)', fontWeight:700 } }, 'Logo')
-          ),
+          React.createElement('img', { 
+            src: './logo.png',
+            alt: 'Surf Forecast logo', 
+            className: 'w-12 h-12 rounded border', 
+            style: { objectFit: 'contain' }
+          }),          
           React.createElement('div', null,
             React.createElement('h1', { className: 'text-2xl font-medium' }, 'Surf Forecast'),
             React.createElement('div', { className: 'text-sm text-slate-600' }, '7-daagse weergave — horizontaal scrollen voor meer dagen')

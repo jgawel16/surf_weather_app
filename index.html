@@ -1,122 +1,433 @@
 <!doctype html>
 <html lang="nl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Surf Forecast</title>
-<meta name="color-scheme" content="light dark" />
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<style>
-  :root{
-    --bg:#f3f7fb; --card:#fff; --bd:#e6eef5; --fg:#16324f; --muted:#6b88a4;
-    --accent:#3aa0ff; --accent2:#5fd3c6; --chip:#ffd54a; --chip-fg:#1f2a37;
-    --shadow:0 10px 24px rgba(22,50,79,.08);
-    --radius:16px;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0e1620; --card:#111a24; --bd:#1c2a3a; --fg:#e7eff7; --muted:#9fb4c9; --shadow:0 10px 24px rgba(0,0,0,.35); }
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    background:var(--bg); color:var(--fg);
-  }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Surf Forecast — 7-daags</title>
 
-  /* Hero */
-  .hero{ background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; padding:32px 20px 72px;}
-  .wrap{ max-width:1200px; margin:0 auto; padding:0 24px;}
-  .brand{ display:flex; align-items:center; gap:14px}
-  .brand h1{margin:0; font-size:26px}
-  .brand .sub{opacity:.9; font-size:14px}
+  <!-- Tailwind CDN (play mode) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  /* Sectie */
-  .section{ margin:-48px auto 56px; max-width:1200px; padding:0 24px;}
+  <!-- React + ReactDOM UMD via unpkg -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-  /* Locatie blok */
-  .location{
-    background:var(--card); border:1px solid var(--bd); border-radius:calc(var(--radius) + 2px);
-    box-shadow:var(--shadow); margin-bottom:28px; overflow:hidden;
-  }
-  .location-hd{
-    display:flex; justify-content:space-between; align-items:center;
-    padding:18px 22px; border-bottom:1px solid var(--bd);
-  }
-  .location-title{ font-weight:800; font-size:20px; letter-spacing:.2px; }
-  .hint{ color:var(--muted); font-size:13px; }
+  <!-- Optional: Supabase JS client (commented out; uncomment and fill keys to use) -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script> -->
 
-  /* Dagen: altijd horizontaal scrollbaar */
-  .days{
-    padding: 18px;
-    display: grid;
-    grid-auto-flow: column;                 /* horizontaal */
-    grid-auto-columns: minmax(260px, 1fr);  /* vaste min-breedte per dag */
-    gap: 18px;
+  <style>
+    /* FONT: replace with hosted GT America files or import from your font host.
+       Example:
+       @font-face {
+         font-family: 'GT America Standard';
+         src: url('/fonts/GT-America-Standard.woff2') format('woff2');
+         font-weight: 400 700;
+         font-style: normal;
+         font-display: swap;
+       }
+    */
+    :root{
+      --accent: #a56cc1;
+      /* Surfline-like palette (approximate) */
+      --surf-red: #ff5a5f;
+      --surf-orange: #ffb400;
+      --surf-green: #4cc29f;
+      --surf-darkgreen: #1f8f6b;
+      --muted: #f6f8fb;
+    }
+    body { font-family: "GT America Standard", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color: #000; }
 
-    overflow-x: auto;                       /* altijd scrollbaar */
-    overflow-y: visible;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-  .days::after{ content:""; width:12px; }   /* ademruimte rechts */
+    /* Horizontal scroll snapping row */
+    .h-scroll {
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+    .h-item { scroll-snap-align: start; }
 
-  /* Dag-kolom */
-  .day{
-    background:var(--card); border:1px solid var(--bd); border-radius:12px;
-    padding:14px; scroll-snap-align:start;
-    display:flex; flex-direction:column; gap:14px;
-    min-height: 100%;
-    min-width: 260px;                       /* matcht grid-auto-columns */
-  }
-  .day-hd{
-    display:flex; justify-content:space-between; align-items:center; gap:10px;
-    padding-bottom:8px; border-bottom:1px dashed var(--bd);
-  }
-  .d-title{ font-weight:800; }
-  .d-sub{ color:var(--muted); font-size:12px; margin-top:2px; }
-  .score{ width:40px; height:40px; border-radius:999px; display:grid; place-items:center;
-          background:var(--chip); color:var(--chip-fg); font-weight:800; }
+    /* subtle card border */
+    .card { border: 1px solid rgba(15,23,42,0.06); background: white; border-radius: 12px; }
 
-  /* Dagdelen-stack */
-  .parts{ display:flex; flex-direction:column; gap:12px; }
-  .part{
-    border:1px solid var(--bd); border-radius:12px; padding:12px;
-    display:grid; grid-template-columns:1fr 1fr; gap:10px;
-    background:var(--card);
-  }
-  .p-name{ grid-column:1 / -1; font-weight:700; }
-  .kv{ font-size:13px; color:var(--muted); }
-  .kv b{ display:block; color:var(--fg); font-size:14px; }
+    /* small alert badge */
+    .alert-badge {
+      width: 18px; height: 18px; border-radius: 12px;
+      display:inline-flex; align-items:center; justify-content:center;
+      color: white; font-size:12px;
+    }
 
-  /* Toolbar (status + refresh) */
-  .toolbar{ display:flex; gap:12px; align-items:center; margin: -28px 24px 12px; }
-  .status{ color:var(--muted); font-size:14px; }
-  .error{ color:#b00020; }
-  .btn{ border:1px solid var(--bd); background:var(--card); color:var(--fg);
-        padding:8px 12px; border-radius:10px; cursor:pointer; box-shadow:var(--shadow); }
-</style>
+    /* Quality color mapping helper classes (tailwind can't know runtime mapping) */
+    .q-red { background: linear-gradient(180deg, rgba(255,90,95,0.06), transparent); border-left: 4px solid var(--surf-red); }
+    .q-orange { background: linear-gradient(180deg, rgba(255,180,0,0.05), transparent); border-left: 4px solid var(--surf-orange); }
+    .q-green { background: linear-gradient(180deg, rgba(76,194,159,0.05), transparent); border-left: 4px solid var(--surf-green); }
+    .q-dark { background: linear-gradient(180deg, rgba(31,143,107,0.06), transparent); border-left: 4px solid var(--surf-darkgreen); }
+
+    /* small visual for swells in row */
+    .swell-line { height: 8px; border-radius: 6px; background: linear-gradient(180deg, #e8f2fb, white); }
+  </style>
 </head>
-<body>
-  <header class="hero">
-    <div class="wrap">
-      <div class="brand">
-        <img src="./favicon.svg" alt="Surf Forecast logo" width="34" height="34">
-        <div>
-          <h1>Surf Forecast</h1>
-          <div class="sub">7-daagse voorspelling per locatie</div>
-        </div>
-      </div>
-    </div>
-  </header>
+<body class="bg-white min-h-screen">
+  <div id="app" class="p-6 max-w-7xl mx-auto"></div>
 
-  <div class="wrap toolbar">
-    <button id="refresh" class="btn">Verversen</button>
-    <span class="status" id="status"></span>
-  </div>
+  <script type="text/javascript">
+  // React in the global scope (React, ReactDOM). Use React.createElement or JSX via babel not included.
+  const { useState, useEffect, useRef } = React;
 
-  <main class="section wrap" id="app"></main>
+  /**************
+   * Helper data
+   **************/
+  // A small set of spot definitions. Add/adjust shoreBearing (degrees pointing FROM SEA TOWARDS LAND).
+  // shoreBearing: direction of wind that would be "onshore" (i.e., wind from sea onto the beach).
+  // Note: precise bearings can be tuned per spot.
+  const SPOTS = [
+    { id: 'schev', name: 'Scheveningen', region: 'Z-H', lat: 52.1086, lon: 4.2878, shoreBearing: 260 }, // approx W
+    { id: 'wijk', name: 'Wijk aan Zee', region: 'N-H', lat: 52.4760, lon: 4.5490, shoreBearing: 250 },
+    { id: 'domburg', name: 'Domburg', region: 'Zeeland', lat: 51.5083, lon: 3.5788, shoreBearing: 230 },
+    { id: 'ijmuiden', name: 'IJmuiden', region: 'N-H', lat: 52.4586, lon: 4.6058, shoreBearing: 260 },
+    { id: 'texel', name: 'Texel', region: 'Wadden', lat: 53.0412, lon: 4.7930, shoreBearing: 200 },
+    { id: 'depanne', name: 'De Panne', region: 'BE', lat: 51.0679, lon: 2.5962, shoreBearing: 225 },
+  ];
 
-<!-- Supabase + config -->
-<script type="module" src="./app.js"></script>
+  // compass name -> degrees (Dutch compass abbreviations included)
+  const COMPASS_TO_DEG = {
+    'N':0,'NNE':22.5,'NE':45,'ENE':67.5,'E':90,'ESE':112.5,'SE':135,'SSE':157.5,'S':180,'SSW':202.5,'SW':225,'WSW':247.5,'W':270,'WNW':292.5,'NW':315,'NNW':337.5,
+    // Dutch
+    'NO':45,'O':90,'ZO':135,'Z':180,'ZW':225,'WZW':247.5,'WNW':292.5,'NW':315
+  };
 
+  /***********************
+   * Utilities
+   ***********************/
+  function degDiff(a, b){
+    // smallest diff between two bearings 0..180
+    let d = Math.abs(a - b) % 360;
+    if (d > 180) d = 360 - d;
+    return d;
+  }
+
+  function parseWindDirString(dirStr){
+    // try to return degrees from a string like "ZW" or "W/WZW W/WZW" or "NW"
+    if (!dirStr) return null;
+    // if contains slash, take first token
+    const token = dirStr.split(/[\/\s,]+/)[0].toUpperCase();
+    if (COMPASS_TO_DEG[token] !== undefined) return COMPASS_TO_DEG[token];
+    // try to extract letters
+    const letters = token.replace(/[^A-Z]/g,'');
+    if (COMPASS_TO_DEG[letters] !== undefined) return COMPASS_TO_DEG[letters];
+    return null;
+  }
+
+  function computeWindType(spot, windDirStr){
+    // returns 'onshore' | 'offshore' | 'crossshore' | 'unknown'
+    const deg = parseWindDirString(windDirStr);
+    if (deg === null) return 'unknown';
+    const shore = spot.shoreBearing; // direction FROM sea to land
+    const diff = degDiff(deg, shore);
+    // If wind direction is close to shoreBearing -> wind blowing TOWARD shore (onshore)
+    // If wind is opposite (180 deg) -> offshore
+    if (diff <= 45) return 'onshore';
+    if (Math.abs(diff - 180) <= 45) return 'offshore';
+    return 'crossshore';
+  }
+
+  function mapScoreToColor(score){
+    // score: 0..4
+    if (score <= 0) return { label: 'slecht', class: 'q-red', color: 'var(--surf-red)' };
+    if (score === 1) return { label: 'matig', class: 'q-orange', color: 'var(--surf-orange)' };
+    if (score === 2 || score === 3) return { label: 'goed', class: 'q-green', color: 'var(--surf-green)' };
+    return { label: 'top', class: 'q-dark', color: 'var(--surf-darkgreen)' };
+  }
+
+  // Build a readable one/two line conclusion from metrics
+  function buildConclusion(entry){
+    // entry contains aggregated day-level metrics (swell_m, period_s, wind_dir, wind_bft, tide, score, wind_type)
+    if (!entry) return '';
+    const swell = entry.swell_m;
+    const period = entry.period_s;
+    const wt = entry.wind_type;
+    const score = entry.score;
+    if (score >= 4) return `Top-venster: ${wt === 'offshore' ? 'clean' : 'lekker'} condities. Pak het beste board en ga vroeg of rond hoogwater.`;
+    if (score === 3) return `Goede surfmomenten vandaag — vooral tijdens de tij-window. Verwacht korte maar krachtige sets.`;
+    if (score === 2) return `Prima voor langeboards of fish — niet ideaal voor shortboarders. Kies rustige uren.`;
+    if (score === 1) return `Klein en rommelig; geschikt voor beginners of softtop-lessen.`;
+    return `Te klein of te rommelig om echt te surfen; misschien alleen geschikt voor lesjes.`;
+  }
+
+  // simple quality scoring algorithm - tweak to your liking
+  function computeScore({swell_m, period_s, wind_bft, wind_type}){
+    let score = 0;
+    // swell size
+    if (swell_m >= 1.2) score += 2;
+    else if (swell_m >= 0.6) score += 1;
+    // period
+    if (period_s >= 9) score += 1;
+    else if (period_s >= 7) score += 0.5;
+    // wind
+    if (wind_type === 'offshore') score += 1;
+    if (wind_type === 'crossshore') score += 0.5;
+    // penalize strong onshore winds
+    if (wind_type === 'onshore' && wind_bft >= 4) score -= 1;
+    // normalize
+    score = Math.max(0, Math.min(4, Math.round(score)));
+    return score;
+  }
+
+  /***********************
+   * Mock data loader
+   * Replace this with Supabase fetch
+   ***********************/
+  function loadMockData(){
+    // Example structure (single column JSON as you mentioned). For each spot -> date -> parts
+    const today = new Date();
+    const days = [...Array(7)].map((_,i)=>{
+      const d = new Date(today); d.setDate(today.getDate() + i);
+      return d.toISOString().slice(0,10);
+    });
+
+    // create sample entries
+    const data = {};
+    SPOTS.forEach(spot=>{
+      data[spot.id] = days.map((date, idx) => {
+        // vary values
+        const swell_m = [0.1,0.4,0.6,1.0,1.4,0.9,0.7][idx % 7];
+        const period_s = [5,6,7,9,10,8,6][idx % 7];
+        const wind_bft = [1,2,3,5,4,3,2][idx % 7];
+        const wind_dir = ['ZW','ZW','W','WNW','NW','W','Z'][idx % 7];
+        // each day has morning/mid/evening parts - make small variations
+        const parts = {
+          morning: { swell_m: swell_m * 0.9, period_s: Math.max(4,period_s-1), wind_bft: Math.max(0,wind_bft-1), wind_dir },
+          midday:   { swell_m: swell_m, period_s, wind_bft, wind_dir },
+          evening:  { swell_m: swell_m * 1.05, period_s: period_s+1, wind_bft: wind_bft+ (idx%2), wind_dir }
+        };
+        return { date, parts, spot: spot.id, summary: '', alert: (idx===3 && spot.id === 'schev') }; // sample alert on day 4 for schev
+      });
+    });
+
+    return data;
+  }
+
+  /***********************
+   * Main App
+   ***********************/
+  function App(){
+    const [spots, setSpots] = useState(SPOTS);
+    const [data, setData] = useState({}); // data[spotId] -> [{date, parts, alert}]
+    const [selectedSpots, setSelectedSpots] = useState(() => {
+      try { return JSON.parse(localStorage.getItem('fav_spots') || '[]'); } catch(e){ return []; }
+    });
+    const [filterBest, setFilterBest] = useState(false);
+    const [visibleDays, setVisibleDays] = useState(7);
+    const [loading, setLoading] = useState(true);
+
+    // load (mock) data on mount - replace with Supabase call here
+    useEffect(() => {
+      setLoading(true);
+      // TODO: Replace loadMockData with fetchFromSupabase()
+      const d = loadMockData();
+      setTimeout(()=>{ setData(d); setLoading(false); }, 300);
+    }, []);
+
+    useEffect(()=>{ localStorage.setItem('fav_spots', JSON.stringify(selectedSpots)); }, [selectedSpots]);
+
+    function toggleSpot(spotId){
+      setSelectedSpots(prev => {
+        if (prev.includes(spotId)) return prev.filter(s=>s!==spotId);
+        return [...prev, spotId];
+      });
+    }
+
+    // compute aggregated day info for a spot
+    function computeDayAggregate(spotId, dayEntry){
+      // dayEntry.parts: morning/mid/evening
+      const ag = { date: dayEntry.date, spot: spotId, alert: !!dayEntry.alert };
+      // compute overall swell/period/wind as averages
+      const parts = ['morning','midday','evening'].map(k => dayEntry.parts[k] || dayEntry.parts[k === 'midday' ? 'midday' : k]);
+      const swell_avg = parts.reduce((s,p)=>s + (p.swell_m || 0),0)/parts.length;
+      const period_avg = Math.round(parts.reduce((s,p)=>s + (p.period_s || 0),0)/parts.length);
+      const wind_bft_avg = Math.round(parts.reduce((s,p)=>s + (p.wind_bft || 0),0)/parts.length);
+      const wind_dir = parts[1]?.wind_dir || parts[0]?.wind_dir || parts[2]?.wind_dir || null;
+      const spot = spots.find(s=>s.id===spotId);
+      const wind_type = computeWindType(spot, wind_dir);
+      const score = computeScore({swell_m: swell_avg, period_s: period_avg, wind_bft: wind_bft_avg, wind_type});
+      ag.swell_m = swell_avg;
+      ag.period_s = period_avg;
+      ag.wind_bft = wind_bft_avg;
+      ag.wind_dir = wind_dir;
+      ag.wind_type = wind_type;
+      ag.score = score;
+      ag.summary = buildConclusion(ag);
+      return ag;
+    }
+
+    // produce sorted list of spots to show
+    function spotsToShow(){
+      const all = selectedSpots.length ? spots.filter(s=>selectedSpots.includes(s.id)) : spots;
+      if (!filterBest) return all;
+      // find best spot for today (max score)
+      const today = new Date().toISOString().slice(0,10);
+      let best = null; let bestScore = -1;
+      all.forEach(sp => {
+        const arr = data[sp.id] || [];
+        const e = arr.find(x => x.date === today);
+        if (!e) return;
+        const ag = computeDayAggregate(sp.id, e);
+        if (ag.score > bestScore){ bestScore = ag.score; best = sp; }
+      });
+      if (best) return [best, ...all.filter(s=>s.id !== best.id)];
+      return all;
+    }
+
+    // UI pieces
+    return React.createElement('div', { className: 'space-y-6' },
+      // header
+      React.createElement('header', { className: 'flex items-center justify-between' },
+        React.createElement('div', { className: 'flex items-center gap-4' },
+          React.createElement('div', { className: 'w-12 h-12 rounded flex items-center justify-center border', style: { background: 'linear-gradient(180deg, white, #faf5ff)' } },
+            // logo placeholder (centered)
+            React.createElement('div', { style: { color: 'var(--accent)', fontWeight:700 } }, 'Logo')
+          ),
+          React.createElement('div', null,
+            React.createElement('h1', { className: 'text-2xl font-medium' }, 'Surf Forecast'),
+            React.createElement('div', { className: 'text-sm text-slate-600' }, '7-daagse weergave — horizontaal scrollen voor meer dagen')
+          )
+        ),
+        React.createElement('div', { className: 'flex items-center gap-3' },
+          React.createElement('label', { className: 'text-sm text-slate-600 mr-2' }, 'Filter beste bovenaan'),
+          React.createElement('input', { type: 'checkbox', checked: filterBest, onChange: e=>setFilterBest(e.target.checked) })
+        )
+      ),
+
+      // spot selector panel
+      React.createElement('section', { className: 'card p-4' },
+        React.createElement('div', { className: 'flex flex-wrap gap-3 items-center' },
+          React.createElement('div', { className: 'text-sm text-slate-700 mr-2' }, 'Selecteer favoriete spots:'),
+          spots.map(sp => React.createElement('label', { key: sp.id, className: 'inline-flex items-center gap-2 text-sm' },
+            React.createElement('input', {
+              type: 'checkbox',
+              checked: selectedSpots.includes(sp.id),
+              onChange: ()=>toggleSpot(sp.id)
+            }),
+            React.createElement('span', null, sp.name)
+          ))
+        )
+      ),
+
+      // main content - each spot column with horizontal slider of days
+      (loading ? React.createElement('div', { className: 'text-center py-16' }, 'Laden...') :
+        spotsToShow().map(spot => {
+          const arr = data[spot.id] || [];
+          // compute aggregates for all days
+          const aggregates = arr.map(day => computeDayAggregate(spot.id, day));
+          // compute CSS class for each day's score
+          return React.createElement('section', { key: spot.id, className: 'card p-4' },
+            React.createElement('div', { className: 'flex items-center justify-between mb-3' },
+              React.createElement('div', null,
+                React.createElement('div', { className: 'text-lg font-medium' }, spot.name),
+                React.createElement('div', { className: 'text-xs text-slate-500' }, spot.region)
+              ),
+              React.createElement('div', null,
+                React.createElement('button', {
+                  className: 'px-3 py-1 text-sm rounded border',
+                  onClick: ()=> { /* future: open spot detail */ }
+                }, '7-daagse weergave')
+              )
+            ),
+
+            // HORIZONTAL slider of days
+            React.createElement('div', { className: 'overflow-x-auto h-scroll flex gap-4 py-2 -mx-2 px-2' },
+              aggregates.map((ag, idx) => {
+                const q = mapScoreToColor(ag.score);
+                return React.createElement('div', { key: ag.date, className: `min-w-[360px] h-item p-3 ${q.class}` },
+                  React.createElement('div', { className: 'flex justify-between items-start mb-2' },
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'text-base font-semibold' }, new Date(ag.date).toLocaleDateString('nl-NL', { weekday: 'long' })),
+                      React.createElement('div', { className: 'text-xs text-slate-500' }, new Date(ag.date).toLocaleDateString('nl-NL', { day: '2-digit', month: 'short' }))
+                    ),
+                    React.createElement('div', { className: 'flex items-center gap-2' },
+                      ag.alert ? React.createElement('div', { className: 'alert-badge', style: { background: 'var(--accent)' }, title: 'Alert aanwezig' }, '⚠') : null,
+                      React.createElement('div', { className: 'text-xs text-slate-500' }, q.label)
+                    )
+                  ),
+
+                  // conclusion (1-2 zinnen)
+                  React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
+
+                  // parts: morning / midday / evening cards
+                  React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
+                    ['morning','midday','evening'].map(part => {
+                      // read part metrics from original day entry (not aggregated)
+                      const dayEntry = (data[spot.id] || []).find(d => d.date === ag.date) || {};
+                      const p = dayEntry.parts ? (dayEntry.parts[part] || {}) : {};
+                      const windType = computeWindType(spot, p.wind_dir || ag.wind_dir);
+                      // compute small local score for the part
+                      const partScore = computeScore({ swell_m: p.swell_m || ag.swell_m, period_s: p.period_s || ag.period_s, wind_bft: p.wind_bft || ag.wind_bft, wind_type: windType });
+                      const qc = mapScoreToColor(partScore);
+                      return React.createElement('div', { key: part, className: 'p-3 card' },
+                        React.createElement('div', { className: 'flex justify-between items-start mb-2' },
+                          React.createElement('div', { className: 'text-sm font-semibold capitalize' }, part === 'midday' ? 'Middag' : part === 'morning' ? 'Ochtend' : 'Avond'),
+                          React.createElement('div', { className: 'text-xs text-slate-500' }, qc.label)
+                        ),
+                        React.createElement('div', { className: 'text-sm' },
+                          React.createElement('div', null,
+                            React.createElement('div', { className: 'text-xs text-slate-400' }, 'Golfhoogte'),
+                            React.createElement('div', { className: 'font-semibold' }, (p.swell_m || ag.swell_m ? `${(p.swell_m || ag.swell_m).toFixed(1)} m` : '—'))
+                          ),
+                          React.createElement('div', { className: 'mt-2' },
+                            React.createElement('div', { className: 'text-xs text-slate-400' }, 'Swell Periode'),
+                            React.createElement('div', { className: 'font-semibold' }, (p.period_s || ag.period_s) ? `${p.period_s || ag.period_s}s` : '—')
+                          ),
+                          React.createElement('div', { className: 'mt-2' },
+                            React.createElement('div', { className: 'text-xs text-slate-400 inline-block mr-2' }, 'Wind'),
+                            React.createElement('div', { className: 'font-semibold inline-block' }, `${p.wind_dir || ag.wind_dir || '—'} • ${p.wind_bft || ag.wind_bft || '—'} bft`),
+                            React.createElement('div', { className: 'text-xs text-slate-400 block mt-1' }, `Type: ${windType}`)
+                          ),
+                          React.createElement('div', { className: 'mt-2' },
+                            React.createElement('div', { className: 'text-xs text-slate-400' }, 'Getij'),
+                            React.createElement('div', { className: 'font-semibold' }, '—') // tide windows: populate from supabase/tide API
+                          )
+                        )
+                      );
+                    })
+                  ),
+
+                  // small footer showing avg swell mini-visual
+                  React.createElement('div', { className: 'mt-3 flex items-center justify-between' },
+                    React.createElement('div', { style: { width: '66%' } },
+                      React.createElement('div', { className: 'text-xs text-slate-400 mb-1' }, 'Swell amplitude'),
+                      React.createElement('div', { className: 'swell-line' }, null)
+                    ),
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'text-xs text-slate-400' }, 'Score'),
+                      React.createElement('div', { className: 'text-lg font-bold', style: { color: 'inherit' } }, Array.from({length: ag.score}).map((_,i)=>'★').join(''))
+                    )
+                  )
+                );
+              })
+            )
+          );
+        })
+      )
+    );
+  }
+
+  // Render
+  ReactDOM.createRoot(document.getElementById('app')).render(React.createElement(App));
+
+  /*******************************
+   * Notes for you (in-code)
+   *
+   * - Replace `loadMockData()` with a function that fetches data from Supabase:
+   *   Example:
+   *     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+   *     const { data, error } = await supabase.from('forecasts').select('*');
+   *   Expect each row to contain the JSON per-spot/per-day column you described.
+   *
+   * - Tide windows currently show placeholder '—'. Add tide data from Rijkswaterstaat or your Supabase.
+   *
+   * - To make GT America load, host the fonts in /fonts and add @font-face above.
+   *
+   * - To fine tune onshore/offshore logic: adjust `shoreBearing` values in SPOTS constant.
+   *
+   * - Palette: accent color is var(--accent) (#a56cc1). Quality colors are set in :root variables.
+   *******************************/
+  </script>
 </body>
 </html>

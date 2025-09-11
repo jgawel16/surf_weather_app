@@ -114,16 +114,64 @@
 
   function App(){
     const [data,setData]=useState({});
+    const [favorites,setFavorites]=useState(()=>{
+      const saved=localStorage.getItem('favorites');
+      return saved?JSON.parse(saved):SPOTS.map(s=>s.id);
+    });
+    const [bestOnly,setBestOnly]=useState(false);
+
     useEffect(()=>{ setData(loadMockData()); },[]);
 
+    useEffect(()=>{ localStorage.setItem('favorites',JSON.stringify(favorites)); },[favorites]);
+
+    const toggleFavorite=(id)=>{
+      setFavorites(favs=> favs.includes(id)? favs.filter(f=>f!==id):[...favs,id]);
+    };
+
+    // filter best spot
+    let spotsToRender=SPOTS.filter(s=>favorites.includes(s.id));
+    if(bestOnly && Object.keys(data).length){
+      let todayStr=new Date().toISOString().slice(0,10);
+      let best=[]; let bestScore=-1;
+      spotsToRender.forEach(spot=>{
+        const arr=data[spot.id]||[];
+        const today=arr.find(d=>d.date===todayStr);
+        if(today){
+          const parts=Object.values(today.parts);
+          const avg=parts.reduce((acc,v)=>acc+computeScore({...v,wind_type:computeWindType(spot,v.wind_dir)}),0)/parts.length;
+          if(avg>bestScore){ best=[spot]; bestScore=avg; }
+          else if(avg===bestScore){ best.push(spot); }
+        }
+      });
+      spotsToRender=best;
+    }
+
     return React.createElement('div',{className:'space-y-6'},
-      React.createElement('header',{className:'flex items-center justify-between'},
+      React.createElement('header',{className:'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4'},
         React.createElement('div',{className:'flex items-center gap-4'},
-          React.createElement('h1',{className:'text-2xl font-medium'},'Surf Forecast'),
-          React.createElement('div',{className:'text-sm text-slate-600'},'AI gestuurde surfdata, recht op je beeldscherm!')
+          React.createElement('img',{src:'Ingezoomd logo.png',alt:'Logo',className:'h-10 w-10'}),
+          React.createElement('div',null,
+            React.createElement('h1',{className:'text-2xl font-medium'},'Surf Forecast'),
+            React.createElement('div',{className:'text-sm text-slate-600'},'AI gestuurde surfdata, recht op je beeldscherm!')
+          )
+        ),
+        React.createElement('div',{className:'flex items-center gap-2'},
+          React.createElement('input',{type:'checkbox',id:'bestOnly',checked:bestOnly,onChange:e=>setBestOnly(e.target.checked)}),
+          React.createElement('label',{htmlFor:'bestOnly',className:'text-sm'},'Toon beste spots')
         )
       ),
-      SPOTS.map(spot=>{
+      React.createElement('div',null,
+        React.createElement('div',{className:'mb-2 font-medium'},'Selecteer je favoriete spots:'),
+        React.createElement('div',{className:'flex gap-4 flex-wrap'},
+          SPOTS.map(s=>
+            React.createElement('label',{key:s.id,className:'flex items-center gap-1 text-sm'},
+              React.createElement('input',{type:'checkbox',checked:favorites.includes(s.id),onChange:()=>toggleFavorite(s.id)}),
+              s.name
+            )
+          )
+        )
+      ),
+      spotsToRender.map(spot=>{
         const arr=data[spot.id]||[];
         return React.createElement('section',{key:spot.id,className:'card p-4'},
           React.createElement('div',{className:'mb-3'},

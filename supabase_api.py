@@ -50,19 +50,7 @@ def rpc_set_body_processed(row_id, value, access_token=None, as_text=False):
     # RPC returns no body (void)
     return True
 
-def rpc_get_empty_meteo(limit=10, access_token=None):
-    url = f"{SUPABASE_URL}/rest/v1/rpc/get_empty_meteo"
-    headers = {
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/json",
-    }
-    payload = {"p_limit": limit}
-    r = requests.post(url, headers=headers, json=payload, timeout=30)
-    r.raise_for_status()
-    return r.json()  # [{id, body}, ...]
-
-def rpc_set_openmeteo(row_id, value, access_token=None):
+def rpc_set_openmeteo(row_id, value, access_token=None, as_text=False):
     url = f"{SUPABASE_URL}/rest/v1/rpc/set_openmeteo"
     headers = {
         "apikey": SUPABASE_ANON_KEY,
@@ -70,7 +58,7 @@ def rpc_set_openmeteo(row_id, value, access_token=None):
         "Content-Type": "application/json",
     }
     # jsonb: p_value = JSON; text: p_value = string
-    payload = {"p_id": row_id, "p_value": value}
+    payload = {"p_id": row_id, "p_value": value if not as_text else json.dumps(value, ensure_ascii=False)}
     r = requests.post(url, headers=headers, json=payload, timeout=60)
     r.raise_for_status()
     # RPC returns no body (void)

@@ -18,7 +18,7 @@ def main():
     
     for row in rows:
         value_processed_body = groq_api.groq_process_text(row["body"])
-        value_openmeteo = openmeteo_api.get_openmeteo_data()  
+        value_openmeteo = openmeteo_api.get_openmeteo_data(row["openmeteo"])  
 
         # Als je kolom jsonb is:
         supabase_api.rpc_set_body_processed(row["id"], value_processed_body, access_token=access_token, as_text=False)

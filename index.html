@@ -12,33 +12,64 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
+  <!-- Optional: Supabase JS client (commented out; uncomment and fill keys to use) -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script> -->
+
   <style>
+    /* FONT: replace with hosted GT America files or import from your font host.
+       Example:
+       @font-face {
+         font-family: 'GT America Standard';
+         src: url('/fonts/GT-America-Standard.woff2') format('woff2');
+         font-weight: 400 700;
+         font-style: normal;
+         font-display: swap;
+       }
+    */
     :root{
       --accent: #a56cc1;
+      /* Surfline-like palette (approximate) */
       --surf-red: #ff5a5f;
       --surf-orange: #ffb400;
       --surf-green: #4cc29f;
       --surf-darkgreen: #1f8f6b;
       --muted: #f6f8fb;
     }
-    body { 
-      font-family: "GT America Standard", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; 
-      color: #000; 
-      background: #fff; 
+    body { font-family: "GT America Standard", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color: #000; background: #fff; }
+
+    /* Horizontal scroll snapping row */
+    .h-scroll {
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
     }
-    .h-scroll { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
     .h-item { scroll-snap-align: start; }
+
+    /* subtle card border */
     .card { border: 1px solid rgba(15,23,42,0.06); background: white; border-radius: 12px; }
-    .alert-badge { width: 18px; height: 18px; border-radius: 12px; display:inline-flex; align-items:center; justify-content:center; color: white; font-size:12px; }
+
+    /* small alert badge */
+    .alert-badge {
+      width: 18px; height: 18px; border-radius: 12px;
+      display:inline-flex; align-items:center; justify-content:center;
+      color: white; font-size:12px;
+    }
+
+    /* Part (ochtend/middag/avond) colored background + left border */
     .part-red { background: linear-gradient(180deg, rgba(255,90,95,0.06), transparent); border-left: 6px solid var(--surf-red); }
     .part-orange { background: linear-gradient(180deg, rgba(255,180,0,0.05), transparent); border-left: 6px solid var(--surf-orange); }
     .part-green { background: linear-gradient(180deg, rgba(76,194,159,0.05), transparent); border-left: 6px solid var(--surf-green); }
     .part-dark { background: linear-gradient(180deg, rgba(31,143,107,0.06), transparent); border-left: 6px solid var(--surf-darkgreen); }
+
+    /* Day card: only left border colored (no background) */
     .day-border-red { border-left: 8px solid var(--surf-red); }
     .day-border-orange { border-left: 8px solid var(--surf-orange); }
     .day-border-green { border-left: 8px solid var(--surf-green); }
     .day-border-dark { border-left: 8px solid var(--surf-darkgreen); }
+
+    /* small visual for swells in row (kept if wanted later) */
     .swell-line { height: 8px; border-radius: 6px; background: linear-gradient(180deg, #e8f2fb, white); }
+
+    /* draggable cursor */
     .dragging { cursor: grabbing !important; cursor: -webkit-grabbing !important; }
     .draggable { cursor: grab; cursor: -webkit-grab; }
   </style>
@@ -66,11 +97,15 @@
     'NO':45,'O':90,'ZO':135,'Z':180,'ZW':225,'WZW':247.5,'WNW':292.5,'NW':315
   };
 
+  /***********************
+   * Utilities
+   ***********************/
   function degDiff(a, b){
     let d = Math.abs(a - b) % 360;
     if (d > 180) d = 360 - d;
     return d;
   }
+
   function parseWindDirString(dirStr){
     if (!dirStr) return null;
     const token = dirStr.split(/[\/\s,]+/)[0].toUpperCase();
@@ -79,6 +114,7 @@
     if (COMPASS_TO_DEG[letters] !== undefined) return COMPASS_TO_DEG[letters];
     return null;
   }
+
   function computeWindType(spot, windDirStr){
     const deg = parseWindDirString(windDirStr);
     if (deg === null) return 'unknown';
@@ -88,27 +124,35 @@
     if (Math.abs(diff - 180) <= 45) return 'offshore';
     return 'crossshore';
   }
+
   function mapScoreToColorObj(score){
     if (score <= 0) return { key: 'red', classPart: 'part-red', classDay: 'day-border-red', color: 'var(--surf-red)' };
     if (score === 1) return { key: 'orange', classPart: 'part-orange', classDay: 'day-border-orange', color: 'var(--surf-orange)' };
     if (score === 2 || score === 3) return { key: 'green', classPart: 'part-green', classDay: 'day-border-green', color: 'var(--surf-green)' };
     return { key: 'dark', classPart: 'part-dark', classDay: 'day-border-dark', color: 'var(--surf-darkgreen)' };
   }
+
+  // Beaufort -> km/h midpoint table (approx)
   const BFT_TO_KMH = [0,3,8.5,15.5,24,33.5,44,55.5,68,81.5,95.5,110,125];
   function bftToKmh(bft){
     if (bft == null || isNaN(bft)) return null;
     const idx = Math.max(0, Math.min(12, Math.round(Number(bft))));
     return Math.round(BFT_TO_KMH[idx]);
   }
+
+  // Build conclusion
   function buildConclusion(entry){
     if (!entry) return '';
     const score = entry.score;
+    const wt = entry.wind_type;
     if (score >= 4) return `Top-venster: sterke sets en gunstige wind — pak je korte board en ga vroeg of rond hoogwater.`;
     if (score === 3) return `Goede surfmomenten — vooral de beste dagdelen checken. Korte ritjes maar krachtig.`;
     if (score === 2) return `Prima voor longboard/fish; niet ideaal voor shortboarders. Kies rustige uren.`;
     if (score === 1) return `Klein en rommelig; goed voor beginners of lessen.`;
     return `Te klein of te rommelig; waarschijnlijk alleen geschikt voor lesjes/softtop.`;
   }
+
+  // scoring
   function computeScore({swell_m, period_s, wind_bft, wind_type}){
     let score = 0;
     if (swell_m >= 1.2) score += 2;
@@ -121,12 +165,17 @@
     score = Math.max(0, Math.min(4, Math.round(score)));
     return score;
   }
+
+  /***********************
+   * Mock data loader (replace with Supabase fetch)
+   ***********************/
   function loadMockData(){
     const today = new Date();
     const days = [...Array(7)].map((_,i)=>{
       const d = new Date(today); d.setDate(today.getDate() + i);
       return d.toISOString().slice(0,10);
     });
+
     const data = {};
     SPOTS.forEach(spot=>{
       data[spot.id] = days.map((date, idx) => {
@@ -142,14 +191,20 @@
         return { date, parts, spot: spot.id, summary: '', alert: (idx===3 && spot.id==='schev') };
       });
     });
+
     return data;
   }
+
+  /***********************
+   * Drag-to-scroll hook
+   ***********************/
   function useDragScroll(ref){
     useEffect(()=>{
       const el = ref.current;
       if (!el) return;
       let isDown = false;
       let startX; let scrollLeft;
+
       function onMouseDown(e){
         isDown = true;
         el.classList.add('dragging');
@@ -160,10 +215,13 @@
       function onMouseMove(e){
         if(!isDown) return;
         const x = e.pageX - el.offsetLeft;
-        const walk = (x - startX) * 1.2;
+        const walk = (x - startX) * 1.2; // scroll-fast
         el.scrollLeft = scrollLeft - walk;
       }
-      function onUp(){ isDown = false; el.classList.remove('dragging'); }
+      function onUp(){
+        isDown = false;
+        el.classList.remove('dragging');
+      }
       function onTouchStart(e){
         isDown = true;
         el.classList.add('dragging');
@@ -177,12 +235,15 @@
         el.scrollLeft = scrollLeft - walk;
       }
       function onTouchEnd(){ onUp(); }
+
       el.addEventListener('mousedown', onMouseDown);
       el.addEventListener('mousemove', onMouseMove);
       window.addEventListener('mouseup', onUp);
+
       el.addEventListener('touchstart', onTouchStart, {passive:true});
       el.addEventListener('touchmove', onTouchMove, {passive:true});
       el.addEventListener('touchend', onTouchEnd);
+
       return () => {
         el.removeEventListener('mousedown', onMouseDown);
         el.removeEventListener('mousemove', onMouseMove);
@@ -194,6 +255,9 @@
     }, [ref]);
   }
 
+  /***********************
+   * Main App
+   ***********************/
   function App(){
     const [spots, setSpots] = useState(SPOTS);
     const [data, setData] = useState({});
@@ -202,16 +266,21 @@
     });
     const [filterBest, setFilterBest] = useState(false);
     const [loading, setLoading] = useState(true);
-    const containerRefs = useRef({});
+    const containerRefs = useRef({}); // hold refs for each spot slider
+
     useEffect(() => {
       setLoading(true);
       const d = loadMockData();
       setTimeout(()=>{ setData(d); setLoading(false); }, 250);
     }, []);
+
     useEffect(()=>{ localStorage.setItem('fav_spots', JSON.stringify(selectedSpots)); }, [selectedSpots]);
+
     function toggleSpot(spotId){
       setSelectedSpots(prev => prev.includes(spotId) ? prev.filter(s=>s!==spotId) : [...prev, spotId]);
     }
+
+    // compute part score and day composite score (average of parts)
     function computeDayAggregate(spotId, dayEntry){
       const ag = { date: dayEntry.date, spot: spotId, alert: !!dayEntry.alert, partsComputed: {} };
       const spot = spots.find(s=>s.id===spotId);
@@ -224,8 +293,10 @@
         ag.partsComputed[k] = { ...p, wind_type, score };
         scores.push(score);
       });
+      // average score across parts (float), but map to integer for color mapping
       const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : 0;
       ag.score = avg;
+      // overall aggregated numbers for summary display
       const swell_avg = Object.values(ag.partsComputed).reduce((s,p)=>s + (p.swell_m || 0),0)/3;
       const period_avg = Math.round(Object.values(ag.partsComputed).reduce((s,p)=>s + (p.period_s || 0),0)/3);
       const wind_bft_avg = Math.round(Object.values(ag.partsComputed).reduce((s,p)=>s + (p.wind_bft || 0),0)/3);
@@ -239,6 +310,7 @@
       ag.summary = buildConclusion(ag);
       return ag;
     }
+
     function spotsToShow(){
       const all = selectedSpots.length ? spots.filter(s=>selectedSpots.includes(s.id)) : spots;
       if (!filterBest) return all;
@@ -254,70 +326,124 @@
       if (best) return [best, ...all.filter(s=>s.id !== best.id)];
       return all;
     }
+
+    // assign refs
     useEffect(()=>{
       spotsToShow().forEach(sp => {
         if (!containerRefs.current[sp.id]) containerRefs.current[sp.id] = React.createRef();
       });
     });
+
+    // apply drag hook on visible containers
     useEffect(()=>{
       Object.values(containerRefs.current).forEach(r => {
-        if (r && r.current) useDragScroll(r);
+        if (r && r.current) useDragScroll(r); // note: hook expects a ref; called here imperatively per ref
       });
+      // NOTE: above is fine for this small prototype. If you want optimization, refactor hook usage.
     }, [containerRefs, data, selectedSpots, filterBest]);
 
+    // Render
     return React.createElement('div', { className: 'space-y-6' },
       React.createElement('header', { className: 'flex items-center justify-between' },
         React.createElement('div', { className: 'flex items-center gap-4' },
-          // Logo vervangen door afbeelding
-          React.createElement('div', { className: 'w-12 h-12 rounded flex items-center justify-center border overflow-hidden', style: { background: 'linear-gradient(180deg, white, #faf5ff)' } },
-            React.createElement('img', { src: 'Ingezoomd logo.png', alt: 'Logo', className: 'object-contain w-full h-full' })
+          React.createElement('div', { className: 'w-12 h-12 rounded flex items-center justify-center border', style: { background: 'linear-gradient(180deg, white, #faf5ff)' } },
+            React.createElement('div', { style: { color: 'var(--accent)', fontWeight:700 } }, 'Logo')
           ),
           React.createElement('div', null,
             React.createElement('h1', { className: 'text-2xl font-medium' }, 'Surf Forecast'),
             React.createElement('div', { className: 'text-sm text-slate-600' }, 'AI gestuurde surfdata, recht op je beeldscherm!')
           )
         ),
-        React.createElement('div', { className: 'flex items-center gap-2' },
-          React.createElement('button', { className: 'px-3 py-1 rounded-xl text-sm border', onClick: ()=>setFilterBest(!filterBest) }, filterBest ? 'Toon alles' : 'Toon beste vandaag'),
+        React.createElement('div', { className: 'flex items-center gap-3' },
+          React.createElement('label', { className: 'text-sm text-slate-600 mr-2' }, 'Filter beste bovenaan'),
+          React.createElement('input', { type: 'checkbox', checked: filterBest, onChange: e=>setFilterBest(e.target.checked) })
         )
       ),
-      loading ? React.createElement('div', { className: 'text-center py-12 text-slate-500' }, 'Laden...') :
-      React.createElement('div', { className: 'space-y-12' },
-        spotsToShow().map(sp => {
-          const arr = data[sp.id] || [];
-          return React.createElement('section', { key: sp.id, className: 'space-y-4' },
-            React.createElement('div', { className: 'flex items-center justify-between' },
-              React.createElement('h2', { className: 'text-xl font-semibold' }, sp.name),
-              React.createElement('button', { className: 'text-sm px-2 py-1 border rounded-lg', onClick: ()=>toggleSpot(sp.id) }, selectedSpots.includes(sp.id) ? 'Verwijder favoriet' : 'Voeg toe als favoriet')
+
+      React.createElement('section', { className: 'card p-4' },
+        React.createElement('div', { className: 'flex flex-wrap gap-3 items-center' },
+          React.createElement('div', { className: 'text-sm text-slate-700 mr-2' }, 'Selecteer favoriete spots:'),
+          spots.map(sp => React.createElement('label', { key: sp.id, className: 'inline-flex items-center gap-2 text-sm' },
+            React.createElement('input', {
+              type: 'checkbox',
+              checked: selectedSpots.includes(sp.id),
+              onChange: ()=>toggleSpot(sp.id)
+            }),
+            React.createElement('span', null, sp.name)
+          ))
+        )
+      ),
+
+      (loading ? React.createElement('div', { className: 'text-center py-16' }, 'Laden...') :
+        spotsToShow().map(spot => {
+          const arr = data[spot.id] || [];
+          const aggregates = arr.map(day => computeDayAggregate(spot.id, day));
+          return React.createElement('section', { key: spot.id, className: 'card p-4' },
+            React.createElement('div', { className: 'flex items-center justify-between mb-3' },
+              React.createElement('div', null,
+                React.createElement('div', { className: 'text-lg font-medium' }, spot.name),
+                React.createElement('div', { className: 'text-xs text-slate-500' }, spot.region)
+              ),
+              React.createElement('div', null,
+                React.createElement('button', { className: 'px-3 py-1 text-sm rounded border' }, '7-daagse weergave')
+              )
             ),
-            React.createElement('div', { ref: containerRefs.current[sp.id], className: 'flex gap-4 overflow-x-auto h-scroll draggable pb-2' },
-              arr.map(dayEntry => {
-                const ag = computeDayAggregate(sp.id, dayEntry);
-                const col = mapScoreToColorObj(ag.score);
-                return React.createElement('div', { key: ag.date, className: `min-w-[260px] h-item flex-shrink-0 card ${col.classDay} p-4 space-y-3 relative` },
-                  ag.alert && React.createElement('div', { className: 'absolute top-2 right-2 alert-badge', style: { background: col.color } }, '!'),
-                  React.createElement('div', { className: 'flex items-center justify-between' },
-                    React.createElement('div', { className: 'font-medium' }, new Date(ag.date).toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' })),
-                    React.createElement('div', { className: 'flex items-center gap-2 text-sm text-slate-500' },
-                      ag.wind_dir, ', ', ag.wind_bft, ' Bft'
+
+            // slider container - attach ref and draggable class
+            React.createElement('div', {
+              ref: el => { if (el) containerRefs.current[spot.id] = { current: el }; },
+              className: 'overflow-x-auto h-scroll flex gap-4 py-2 -mx-2 px-2 draggable'
+            },
+              aggregates.map((ag, idx) => {
+                const dayColor = mapScoreToColorObj(ag.score);
+                return React.createElement('div', {
+                  key: ag.date,
+                  className: `min-w-[360px] h-item p-3 card ${dayColor.classDay}`,
+                  style: { background: 'white' } // keep main card white
+                },
+                  React.createElement('div', { className: 'flex justify-between items-start mb-2' },
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'text-base font-semibold' }, new Date(ag.date).toLocaleDateString('nl-NL', { weekday: 'long' })),
+                      React.createElement('div', { className: 'text-xs text-slate-500' }, new Date(ag.date).toLocaleDateString('nl-NL', { day: '2-digit', month: 'short' }))
+                    ),
+                    React.createElement('div', { className: 'flex items-center gap-2' },
+                      ag.alert ? React.createElement('div', { className: 'alert-badge', style: { background: 'var(--accent)' }, title: 'Alert aanwezig' }, '⚠') : null
                     )
                   ),
-                  React.createElement('div', { className: 'flex items-center justify-between' },
-                    React.createElement('div', { className: 'text-2xl font-bold' }, `${ag.swell_m}m`),
-                    React.createElement('div', { className: 'text-slate-600 text-sm' }, `${ag.period_s}s`)
-                  ),
-                  React.createElement('div', { className: 'space-y-1' },
-                    ['morning','midday','evening'].map(k => {
-                      const p = ag.partsComputed[k];
-                      if (!p) return null;
-                      const c = mapScoreToColorObj(p.score);
-                      return React.createElement('div', { key: k, className: `px-2 py-1 rounded ${c.classPart} flex items-center justify-between` },
-                        React.createElement('div', null, k),
-                        React.createElement('div', null, `${p.swell_m}m / ${p.period_s}s`)
+
+                  // conclusion
+                  React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
+
+                  // parts
+                  React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
+                    ['morning','midday','evening'].map(part => {
+                      const dayEntry = (data[spot.id] || []).find(d => d.date === ag.date) || {};
+                      const p = dayEntry.parts ? (dayEntry.parts[part] || {}) : {};
+                      const pc = ag.partsComputed[part] || {};
+                      const scoreObj = mapScoreToColorObj(pc.score);
+                      // determine wind display in km/h (if part provides kmh already use it)
+                      const windKmh = (p.wind_kmh != null) ? Math.round(p.wind_kmh) : (p.wind_bft != null ? bftToKmh(p.wind_bft) : (ag.wind_bft != null ? bftToKmh(ag.wind_bft) : null));
+                      return React.createElement('div', { key: part, className: `p-3 card ${scoreObj.classPart}` },
+                        React.createElement('div', { className: 'mb-2' },
+                          React.createElement('div', { className: 'text-sm font-semibold capitalize' }, part === 'midday' ? 'Middag' : part === 'morning' ? 'Ochtend' : 'Avond')
+                        ),
+                        React.createElement('div', { className: 'text-sm' },
+                          React.createElement('div', null,
+                            React.createElement('div', { className: 'text-xs text-slate-400' }, 'Golfhoogte'),
+                            React.createElement('div', { className: 'font-semibold' }, (p.swell_m || ag.swell_m ? `${(p.swell_m || ag.swell_m).toFixed(1)} m` : '—'))
+                          ),
+                          React.createElement('div', { className: 'mt-2' },
+                            React.createElement('div', { className: 'text-xs text-slate-400' }, 'Swell Periode'),
+                            React.createElement('div', { className: 'font-semibold' }, (p.period_s || ag.period_s) ? `${p.period_s || ag.period_s}s` : '—')
+                          ),
+                          React.createElement('div', { className: 'mt-2' },
+                            React.createElement('div', { className: 'text-xs text-slate-400 inline-block mr-2' }, 'Wind'),
+                            React.createElement('div', { className: 'font-semibold inline-block' }, `${p.wind_dir || ag.wind_dir || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`)
+                          )
+                        )
                       );
                     })
-                  ),
-                  React.createElement('div', { className: 'text-sm text-slate-600 pt-2' }, ag.summary)
+                  )
                 );
               })
             )
@@ -327,10 +453,7 @@
     );
   }
 
-  ReactDOM.render(
-    React.createElement(App),
-    document.getElementById('app')
-  );
+  ReactDOM.createRoot(document.getElementById('app')).render(React.createElement(App));
   </script>
 </body>
 </html>

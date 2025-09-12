@@ -285,11 +285,26 @@ window.React.createElement('header', { className: 'flex flex-col sm:flex-row sm:
     window.React.createElement('input', { type: 'checkbox', checked: filterBest, onChange: e => setFilterBest(e.target.checked) })
   )
 ),
-    // favorieten → dropdown
-    window.React.createElement('section', { className: 'card p-4' },
-      window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
-      window.React.createElement(SpotDropdown, { allSpotIds, selectedSpots, toggleSpot, loading })
-    ),
+// favorieten → dropdown + beste spots toggle
+window.React.createElement('section', { className: 'card p-4' },
+  window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
+  window.React.createElement('div', { className: 'flex flex-col sm:flex-row gap-3' },
+    // dropdown
+    window.React.createElement(SpotDropdown, { allSpotIds, selectedSpots, toggleSpot, loading }),
+    // toggle beste spots in dezelfde stijl
+    window.React.createElement('label', { 
+      className: 'w-64 flex items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm cursor-pointer'
+    },
+      window.React.createElement('input', { 
+        type: 'checkbox', 
+        checked: filterBest, 
+        onChange: e => setFilterBest(e.target.checked),
+        className: 'mr-2'
+      }),
+      'Toon beste spots'
+    )
+  )
+),
 
     // content
     loading

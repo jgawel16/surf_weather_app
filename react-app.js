@@ -268,20 +268,23 @@ function App(){
   const allSpotIds = Object.keys(data || {});
 
   return window.React.createElement('div', { className: 'space-y-6' },
-    // header
-    window.React.createElement('header', { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' },
-      window.React.createElement('div', { className: 'flex items-center gap-4' },
-        window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'w-12 h-16 object-contain' }),
-        window.React.createElement('div', null,
-          window.React.createElement('h1', { className: 'text-2xl font-medium' }, 'Surf Forecast'),
-          window.React.createElement('div', { className: 'text-sm text-slate-600' }, errMsg ? `Fout: ${errMsg}` : 'AI gestuurde surfdata, recht op je beeldscherm!')
-        )
-      ),
-      window.React.createElement('div', { className: 'flex items-center gap-2' },
-        window.React.createElement('label', { className: 'text-sm text-slate-600' }, 'Toon beste spots'),
-        window.React.createElement('input', { type: 'checkbox', checked: filterBest, onChange: e => setFilterBest(e.target.checked) })
-      )
-    ),
+// header
+window.React.createElement('header', { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' },
+  window.React.createElement('div', { className: 'flex flex-col items-start sm:items-center gap-2' },
+    window.React.createElement('img', { 
+      src: './Ingezoomd logo.png', 
+      alt: 'Surf Forecast logo', 
+      className: 'max-h-16 sm:max-h-20 w-auto object-contain'
+    }),
+    window.React.createElement('div', { className: 'text-sm text-slate-600' }, 
+      errMsg ? `Fout: ${errMsg}` : 'AI gestuurde surfdata, recht op je beeldscherm!'
+    )
+  ),
+  window.React.createElement('div', { className: 'flex items-center gap-2' },
+    window.React.createElement('label', { className: 'text-sm text-slate-600' }, 'Toon beste spots'),
+    window.React.createElement('input', { type: 'checkbox', checked: filterBest, onChange: e => setFilterBest(e.target.checked) })
+  )
+),
 
     // favorieten → dropdown
     window.React.createElement('section', { className: 'card p-4' },

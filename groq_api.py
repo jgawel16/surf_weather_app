@@ -1,13 +1,32 @@
 import os
 import json
+import re
 from groq import Groq
 from dotenv import load_dotenv
+# from supabase import create_client, Client  # als je supabase-py gebruikt
 
 load_dotenv()
 
-# === Groq ===========================================================
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
+
+def _extract_json_object(text: str) -> str:
+    """
+    Haal het JSON-object robuust uit modeloutput:
+    - verwijdert eventuele ```json ... ``` fences
+    - pakt substring van eerste '{' tot laatste '}'.
+    Raise bij mislukking.
+    """
+    s = text.strip()
+    if s.startswith("```"):
+        # verwijder codefences
+        s = re.sub(r"^```(?:json)?\s*|\s*```$", "", s, flags=re.IGNORECASE | re.DOTALL).strip()
+    # pak van eerste { tot laatste }
+    start = s.find("{")
+    end = s.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ValueError("Kon geen JSON-object vinden in modeloutput.")
+    return s[start:end+1]
 
 def groq_process_text(text):
     prompt = f"""Je krijgt hieronder een informeel geschreven surfweerbericht in het Nederlands.
@@ -101,17 +120,14 @@ def groq_process_text(text):
     Invoer:
     <{text}>
     """
-    
+
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model="llama-3.3-70b-versatile",
         stream=False,
-        temperature=0.5,
+        temperature=0.2,  # lager voor deterministischer JSON
     )
-    # verwacht JSON-array in tekst; parse naar Python object:
     content = chat_completion.choices[0].message.content
-    try:
-        return json.loads(content)  # -> JSON (geschikt voor jsonb-kolom)
-    except json.JSONDecodeError:
-        # fallback: sla als text-string op, of raise
-        return content
+    raw = _extract_json_object(content)
+    data = json.loads(raw)  # -> dict (geschikt voor jsonb)
+    return data  # dict

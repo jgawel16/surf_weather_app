@@ -4,13 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Surf Forecast — 7-daags</title>
+
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+
   <!-- React + ReactDOM -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
   <style>
-    :root {
+    :root{
       --accent: #a56cc1;
       --surf-red: #ff5a5f;
       --surf-orange: #ffb400;
@@ -18,154 +21,288 @@
       --surf-darkgreen: #1f8f6b;
       --muted: #f6f8fb;
     }
+
     body {
       font-family: "GT America Standard", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
       color: #000;
+      background: #fff;
     }
+
+    /* slider + snapping */
     .h-scroll { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; cursor: grab; }
     .h-item { scroll-snap-align: start; }
+
     .card { border: 1px solid rgba(15,23,42,0.06); background: white; border-radius: 12px; }
+
     .alert-badge { width: 18px; height: 18px; border-radius: 12px; display:inline-flex; align-items:center; justify-content:center; color: white; font-size:12px; }
-    .q-red    { border-left: 4px solid var(--surf-red); }
-    .q-orange { border-left: 4px solid var(--surf-orange); }
-    .q-green  { border-left: 4px solid var(--surf-green); }
-    .q-dark   { border-left: 4px solid var(--surf-darkgreen); }
-    .part-red    { background: rgba(255,90,95,0.08); }
-    .part-orange { background: rgba(255,180,0,0.08); }
-    .part-green  { background: rgba(76,194,159,0.08); }
-    .part-dark   { background: rgba(31,143,107,0.08); }
-    .swell-line { height: 8px; border-radius: 6px; background: linear-gradient(180deg, #e8f2fb, white); }
+
+    /* day: only left border colored */
+    .q-red  { border-left: 6px solid var(--surf-red); }
+    .q-orange { border-left: 6px solid var(--surf-orange); }
+    .q-green { border-left: 6px solid var(--surf-green); }
+    .q-dark { border-left: 6px solid var(--surf-darkgreen); }
+
+    /* parts: light background + left border feel (we keep a subtle fill via background) */
+    .part-red { background: rgba(255,90,95,0.08); border-radius: 8px; }
+    .part-orange { background: rgba(255,180,0,0.08); border-radius: 8px; }
+    .part-green { background: rgba(76,194,159,0.08); border-radius: 8px; }
+    .part-dark { background: rgba(31,143,107,0.08); border-radius: 8px; }
+
+    .cursor-grabbing { cursor: grabbing !important; cursor: -webkit-grabbing !important; }
   </style>
 </head>
-<body class="bg-white min-h-screen">
-  <div id="app" class="p-6 max-w-7xl mx-auto"></div>
-  <script type="text/javascript">
-    const { useState, useEffect, useRef } = React;
 
-    /********** Helper Data **********/
+<body class="min-h-screen">
+  <div id="app" class="p-6 max-w-7xl mx-auto"></div>
+
+  <script type="text/javascript">
+    const { useState, useEffect } = React;
+
+    // --- Spots (adjust shoreBearing per spot for accurate onshore/offshore calc if needed) ---
     const SPOTS = [
       { id: 'schev', name: 'Scheveningen', region: 'Z-H', shoreBearing: 260 },
       { id: 'wijk', name: 'Wijk aan Zee', region: 'N-H', shoreBearing: 250 },
       { id: 'domburg', name: 'Domburg', region: 'Zeeland', shoreBearing: 230 },
     ];
+
     const COMPASS_TO_DEG = { 'N':0,'NO':45,'O':90,'ZO':135,'Z':180,'ZW':225,'W':270,'NW':315 };
 
-    /********** Utilities **********/
-    function degDiff(a,b){ let d=Math.abs(a-b)%360; return d>180?360-d:d; }
-    function parseWindDirString(dir){ if(!dir) return null; const t=dir.split(/[\/\s,]+/)[0].toUpperCase(); return COMPASS_TO_DEG[t]??null; }
-    function computeWindType(spot,windDir){ const deg=parseWindDirString(windDir); if(deg===null) return 'unknown'; const diff=degDiff(deg,spot.shoreBearing); if(diff<=45) return 'onshore'; if(Math.abs(diff-180)<=45) return 'offshore'; return 'crossshore'; }
-    function bftToKmh(bft){ return Math.round(bft*1.87*10); }
-    function mapScoreToColor(score){ if(score<=0) return {class:'q-red',part:'part-red',label:'slecht'}; if(score===1) return {class:'q-orange',part:'part-orange',label:'matig'}; if(score<=3) return {class:'q-green',part:'part-green',label:'goed'}; return {class:'q-dark',part:'part-dark',label:'top'}; }
-    function computeScore({swell_m,period_s,wind_bft,wind_type}){ let s=0; if(swell_m>=1.2)s+=2; else if(swell_m>=0.6)s+=1; if(period_s>=9)s+=1; else if(period_s>=7)s+=0.5; if(wind_type==='offshore')s+=1; if(wind_type==='crossshore')s+=0.5; if(wind_type==='onshore'&&wind_bft>=4)s-=1; return Math.max(0,Math.min(4,Math.round(s))); }
-    function buildConclusion(e){ if(!e) return ''; if(e.score>=4) return 'Top-condities, beste momenten bij hoogwater.'; if(e.score===3) return 'Goede surfmomenten vandaag, vooral rond tij-window.'; if(e.score===2) return 'Prima voor longboards of fish, minder ideaal voor shortboards.'; if(e.score===1) return 'Klein en rommelig; leuk voor beginners.'; return 'Te klein of rommelig om te surfen.'; }
+    // --- Utilities ---
+    function degDiff(a,b){ let d = Math.abs(a-b) % 360; if(d>180) d = 360 - d; return d; }
+    function parseWindDirString(dir){ if(!dir) return null; const token = String(dir).split(/[\/\s,]+/)[0].toUpperCase(); return COMPASS_TO_DEG[token] ?? null; }
+    function computeWindType(spot, windDirStr){ const deg = parseWindDirString(windDirStr); if(deg === null) return 'unknown'; const diff = degDiff(deg, spot.shoreBearing); if(diff <= 45) return 'onshore'; if(Math.abs(diff - 180) <= 45) return 'offshore'; return 'crossshore'; }
+    // Beaufort -> km/h approx using standard relation: v(km/h) ~ 3.0096 * B^(3/2)
+    function bftToKmh(bft){ if(bft == null || isNaN(bft)) return null; return Math.round(3.0096 * Math.pow(Number(bft), 1.5)); }
 
-    /********** Mock Data **********/
+    function computeScore({swell_m, period_s, wind_bft, wind_type}){
+      let score = 0;
+      if (swell_m >= 1.2) score += 2; else if (swell_m >= 0.6) score += 1;
+      if (period_s >= 9) score += 1; else if (period_s >= 7) score += 0.5;
+      if (wind_type === 'offshore') score += 1;
+      if (wind_type === 'crossshore') score += 0.5;
+      if (wind_type === 'onshore' && wind_bft >= 4) score -= 1;
+      return Math.max(0, Math.min(4, Math.round(score)));
+    }
+
+    function mapScoreToColor(score){
+      if (score <= 0) return { classDay: 'q-red', classPart: 'part-red' };
+      if (score === 1) return { classDay: 'q-orange', classPart: 'part-orange' };
+      if (score === 2 || score === 3) return { classDay: 'q-green', classPart: 'part-green' };
+      return { classDay: 'q-dark', classPart: 'part-dark' };
+    }
+
+    function buildConclusion(agg){
+      if(!agg) return '';
+      if (agg.score >= 4) return 'Top-condities, beste momenten bij hoogwater.';
+      if (agg.score === 3) return 'Goede surfmomenten vandaag, vooral rond tij-window.';
+      if (agg.score === 2) return 'Prima voor longboards of fish; minder ideaal voor shortboards.';
+      if (agg.score === 1) return 'Klein en rommelig; leuk voor beginners.';
+      return 'Geen surfbare condities.';
+    }
+
+    // --- Mock data loader (replace with Supabase fetch later) ---
     function loadMockData(){
-      const today=new Date();
-      const days=[...Array(5)].map((_,i)=>{const d=new Date(today);d.setDate(today.getDate()+i);return d.toISOString().slice(0,10)});
-      const data={};
-      SPOTS.forEach(sp=>{ data[sp.id]=days.map((date,idx)=>({ date, spot:sp.id, alert:(idx===2&&sp.id==='schev'), parts:{ morning:{swell_m:0.5+idx*0.1,period_s:6+idx,wind_bft:2+idx%3,wind_dir:'ZW'}, midday:{swell_m:0.6+idx*0.1,period_s:7+idx,wind_bft:3+idx%3,wind_dir:'W'}, evening:{swell_m:0.7+idx*0.1,period_s:8+idx,wind_bft:2+idx%3,wind_dir:'NW'} } })); });
+      const today = new Date();
+      const days = [...Array(7)].map((_,i) => { const d = new Date(today); d.setDate(today.getDate() + i); return d.toISOString().slice(0,10); });
+
+      const data = {};
+      SPOTS.forEach((spot, sIdx) => {
+        data[spot.id] = days.map((date, idx) => {
+          const swell_vals = [0.2,0.4,0.6,1.0,1.3,0.8,0.5];
+          const period_vals = [5,6,7,9,10,8,6];
+          const wind_bft_vals = [1,2,3,4,3,2,2];
+          const wind_dir_vals = ['ZW','W','NW','NO','O','ZO','Z'];
+          const swell = swell_vals[idx % swell_vals.length];
+          const period = period_vals[idx % period_vals.length];
+          const wind_bft = wind_bft_vals[idx % wind_bft_vals.length];
+          const wind_dir = wind_dir_vals[idx % wind_dir_vals.length];
+          return {
+            date,
+            alert: (idx === 3 && spot.id === 'schev'),
+            parts: {
+              morning: { swell_m: +(swell*0.9).toFixed(2), period_s: Math.max(4, period-1), wind_bft: Math.max(0, wind_bft-1), wind_dir },
+              midday:  { swell_m: +(swell).toFixed(2), period_s: period, wind_bft, wind_dir },
+              evening: { swell_m: +(swell*1.05).toFixed(2), period_s: period+1, wind_bft: wind_bft + (idx%2), wind_dir }
+            }
+          };
+        });
+      });
       return data;
     }
 
-    /********** App **********/
+    // --- App ---
     function App(){
-      const [spots]=useState(SPOTS);
-      const [data,setData]=useState({});
-      const [selectedSpots,setSelectedSpots]=useState(()=>{try{return JSON.parse(localStorage.getItem('fav_spots')||'[]')}catch{return[]}});
-      const [filterBest,setFilterBest]=useState(false);
-      const sliderRef=useRef(null);
+      const [data, setData] = useState({});
+      const [selectedSpots, setSelectedSpots] = useState(() => {
+        try { const v = localStorage.getItem('fav_spots'); return v ? JSON.parse(v) : SPOTS.map(s=>s.id); }
+        catch { return SPOTS.map(s=>s.id); }
+      });
+      const [filterBest, setFilterBest] = useState(false);
 
-      useEffect(()=>{setData(loadMockData())},[]);
-      useEffect(()=>{localStorage.setItem('fav_spots',JSON.stringify(selectedSpots))},[selectedSpots]);
+      useEffect(() => { setData(loadMockData()); }, []);
 
-      useEffect(()=>{ // drag scroll
-        const slider=sliderRef.current; if(!slider) return;
-        let isDown=false,startX,scrollLeft;
-        const down=e=>{isDown=true;slider.classList.add('cursor-grabbing');startX=e.pageX-slider.offsetLeft;scrollLeft=slider.scrollLeft};
-        const leave=()=>{isDown=false;slider.classList.remove('cursor-grabbing')};
-        const up=()=>{isDown=false;slider.classList.remove('cursor-grabbing')};
-        const move=e=>{if(!isDown)return;e.preventDefault();const x=e.pageX-slider.offsetLeft;const walk=(x-startX);slider.scrollLeft=scrollLeft-walk};
-        slider.addEventListener('mousedown',down);
-        slider.addEventListener('mouseleave',leave);
-        slider.addEventListener('mouseup',up);
-        slider.addEventListener('mousemove',move);
-        return()=>{slider.removeEventListener('mousedown',down);slider.removeEventListener('mouseleave',leave);slider.removeEventListener('mouseup',up);slider.removeEventListener('mousemove',move)};
-      },[]);
+      useEffect(() => { localStorage.setItem('fav_spots', JSON.stringify(selectedSpots)); }, [selectedSpots]);
 
-      function toggleSpot(id){setSelectedSpots(p=>p.includes(id)?p.filter(s=>s!==id):[...p,id])}
-      function computeDayAgg(spotId,day){const parts=Object.values(day.parts);const swell=parts.reduce((a,p)=>a+p.swell_m,0)/3;const per=Math.round(parts.reduce((a,p)=>a+p.period_s,0)/3);const wind_bft=Math.round(parts.reduce((a,p)=>a+p.wind_bft,0)/3);const wind_dir=parts[1].wind_dir;const sp=spots.find(s=>s.id===spotId);const wind_type=computeWindType(sp,wind_dir);const score=computeScore({swell_m:swell,period_s:per,wind_bft,wind_type});return{...day,swell_m:swell,period_s:per,wind_bft,wind_dir,wind_type,score,summary:buildConclusion({swell_m:swell,period_s:per,wind_bft,wind_type,score})}};
+      // drag-to-scroll on all sliders (safe implementation using class selector)
+      useEffect(() => {
+        const sliders = Array.from(document.querySelectorAll('.draggable-slider'));
+        const list = [];
+        sliders.forEach(slider => {
+          let isDown = false, startX = 0, scrollLeft = 0;
+          const onMouseDown = (e) => { isDown = true; slider.classList.add('cursor-grabbing'); startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; };
+          const onMouseLeave = () => { isDown = false; slider.classList.remove('cursor-grabbing'); };
+          const onMouseUp = () => { isDown = false; slider.classList.remove('cursor-grabbing'); };
+          const onMouseMove = (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 1.2; slider.scrollLeft = scrollLeft - walk; };
+          const onTouchStart = (e) => { isDown = true; slider.classList.add('cursor-grabbing'); startX = e.touches[0].pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; };
+          const onTouchMove = (e) => { if(!isDown) return; const x = e.touches[0].pageX - slider.offsetLeft; const walk = (x - startX) * 1.2; slider.scrollLeft = scrollLeft - walk; };
+          const onTouchEnd = () => { isDown = false; slider.classList.remove('cursor-grabbing'); };
 
-      const spotsToShow=()=>{const all=selectedSpots.length?spots.filter(s=>selectedSpots.includes(s.id)):spots;if(!filterBest)return all;const today=new Date().toISOString().slice(0,10);let best=null,score=-1;all.forEach(sp=>{const e=data[sp.id]?.find(d=>d.date===today);if(!e)return;const ag=computeDayAgg(sp.id,e);if(ag.score>score){score=ag.score;best=sp}});return best?[best,...all.filter(s=>s.id!==best.id)]:all};
+          slider.addEventListener('mousedown', onMouseDown);
+          slider.addEventListener('mouseleave', onMouseLeave);
+          slider.addEventListener('mouseup', onMouseUp);
+          slider.addEventListener('mousemove', onMouseMove);
+          slider.addEventListener('touchstart', onTouchStart, { passive: true });
+          slider.addEventListener('touchmove', onTouchMove, { passive: true });
+          slider.addEventListener('touchend', onTouchEnd);
 
-      return React.createElement('div',{className:'space-y-6'},
+          list.push({ slider, onMouseDown, onMouseLeave, onMouseUp, onMouseMove, onTouchStart, onTouchMove, onTouchEnd });
+        });
+
+        return () => {
+          list.forEach(l => {
+            l.slider.removeEventListener('mousedown', l.onMouseDown);
+            l.slider.removeEventListener('mouseleave', l.onMouseLeave);
+            l.slider.removeEventListener('mouseup', l.onMouseUp);
+            l.slider.removeEventListener('mousemove', l.onMouseMove);
+            l.slider.removeEventListener('touchstart', l.onTouchStart);
+            l.slider.removeEventListener('touchmove', l.onTouchMove);
+            l.slider.removeEventListener('touchend', l.onTouchEnd);
+          });
+        };
+      }, [data, selectedSpots, filterBest]);
+
+      function toggleSpot(id){
+        setSelectedSpots(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+      }
+
+      function computeDayAgg(spot, dayEntry){
+        const partsArr = ['morning','midday','evening'].map(k => (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : {swell_m:0,period_s:0,wind_bft:0,wind_dir:null});
+        const swell_avg = partsArr.reduce((a,p) => a + (p.swell_m||0), 0) / partsArr.length;
+        const period_avg = Math.round(partsArr.reduce((a,p) => a + (p.period_s||0), 0) / partsArr.length);
+        const wind_bft_avg = Math.round(partsArr.reduce((a,p) => a + (p.wind_bft||0), 0) / partsArr.length);
+        const wind_dir = partsArr[1]?.wind_dir || partsArr[0]?.wind_dir || partsArr[2]?.wind_dir || null;
+        const wind_type = computeWindType(spot, wind_dir);
+        const score = computeScore({ swell_m: swell_avg, period_s: period_avg, wind_bft: wind_bft_avg, wind_type });
+        return {
+          date: dayEntry.date,
+          parts: dayEntry.parts,
+          alert: !!dayEntry.alert,
+          swell_m: +(swell_avg.toFixed(2)),
+          period_s: period_avg,
+          wind_bft: wind_bft_avg,
+          wind_dir,
+          wind_type,
+          score,
+          summary: buildConclusion({ score })
+        };
+      }
+
+      function spotsToShow(){
+        const active = selectedSpots.length ? SPOTS.filter(s => selectedSpots.includes(s.id)) : SPOTS;
+        if (!filterBest || !Object.keys(data).length) return active;
+        const today = new Date().toISOString().slice(0,10);
+        let bestSpot = null, bestScore = -1;
+        active.forEach(sp => {
+          const todayEntry = (data[sp.id] || []).find(d => d.date === today);
+          if (!todayEntry) return;
+          const agg = computeDayAgg(sp, todayEntry);
+          if (agg.score > bestScore){ bestScore = agg.score; bestSpot = sp; }
+        });
+        return bestSpot ? [bestSpot, ...active.filter(s => s.id !== bestSpot.id)] : active;
+      }
+
+      return React.createElement('div', { className: 'space-y-6' },
         // header
-        React.createElement('header',{className:'flex flex-col sm:flex-row items-center justify-between gap-4'},
-          React.createElement('div',{className:'flex items-center gap-4'},
-            React.createElement('img',{src:'Ingezoomd logo.png',alt:'Logo',className:'w-12 h-16 object-contain'}),
-            React.createElement('div',null,
-              React.createElement('h1',{className:'text-2xl font-medium'},'Surf Forecast'),
-              React.createElement('div',{className:'text-sm text-slate-600'},'AI gestuurde surfdata, recht op je beeldscherm!')
+        React.createElement('header', { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' },
+          React.createElement('div', { className: 'flex items-center gap-4' },
+            React.createElement('img', { src: 'Ingezoomd logo.png', alt: 'Logo', className: 'w-12 h-16 object-contain' }),
+            React.createElement('div', null,
+              React.createElement('h1', { className: 'text-2xl font-medium' }, 'Surf Forecast'),
+              React.createElement('div', { className: 'text-sm text-slate-600' }, 'AI gestuurde surfdata, recht op je beeldscherm!')
             )
           ),
-          React.createElement('div',{className:'flex items-center gap-2'},
-            React.createElement('label',{className:'text-sm text-slate-600'},'Toon beste spots'),
-            React.createElement('input',{type:'checkbox',checked:filterBest,onChange:e=>setFilterBest(e.target.checked)})
+          React.createElement('div', { className: 'flex items-center gap-2' },
+            React.createElement('label', { className: 'text-sm text-slate-600' }, 'Toon beste spots'),
+            React.createElement('input', { type: 'checkbox', checked: filterBest, onChange: e => setFilterBest(e.target.checked) })
           )
         ),
-        // favorites
-        React.createElement('section',{className:'card p-4'},
-          React.createElement('div',{className:'mb-2 text-sm text-slate-700'},'Selecteer je favoriete spots:'),
-          React.createElement('div',{className:'flex flex-wrap gap-3'},
-            spots.map(sp=>React.createElement('label',{key:sp.id,className:'inline-flex items-center gap-2 text-sm'},
-              React.createElement('input',{type:'checkbox',checked:selectedSpots.includes(sp.id),onChange:()=>toggleSpot(sp.id)}),
-              React.createElement('span',null,sp.name)
+
+        // favorites card
+        React.createElement('section', { className: 'card p-4' },
+          React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
+          React.createElement('div', { className: 'flex flex-wrap gap-3' },
+            SPOTS.map(sp => React.createElement('label', { key: sp.id, className: 'inline-flex items-center gap-2 text-sm' },
+              React.createElement('input', { type: 'checkbox', checked: selectedSpots.includes(sp.id), onChange: () => toggleSpot(sp.id) }),
+              React.createElement('span', null, sp.name)
             ))
           )
         ),
-        // main
-        spotsToShow().map(sp=>{
-          const arr=data[sp.id]||[];
-          const aggs=arr.map(day=>computeDayAgg(sp.id,day));
-          return React.createElement('section',{key:sp.id,className:'card p-4'},
-            React.createElement('div',{className:'flex justify-between mb-3'},
-              React.createElement('div',null,
-                React.createElement('div',{className:'text-lg font-medium'},sp.name),
-                React.createElement('div',{className:'text-xs text-slate-500'},sp.region)
+
+        // per-spot panels
+        spotsToShow().map(sp => {
+          const arr = data[sp.id] || [];
+          const aggs = arr.map(d => computeDayAgg(sp, d));
+
+          return React.createElement('section', { key: sp.id, className: 'card p-4' },
+            React.createElement('div', { className: 'flex justify-between mb-3' },
+              React.createElement('div', null,
+                React.createElement('div', { className: 'text-lg font-medium' }, sp.name),
+                React.createElement('div', { className: 'text-xs text-slate-500' }, sp.region)
               )
             ),
-            React.createElement('div',{ref:sliderRef,className:'overflow-x-auto h-scroll flex gap-4 py-2'},
-              aggs.map(ag=>{
-                const q=mapScoreToColor(ag.score);
-                return React.createElement('div',{key:ag.date,className:`min-w-[320px] p-3 card ${q.class}`},
-                  React.createElement('div',{className:'flex justify-between items-start mb-2'},
-                    React.createElement('div',null,
-                      React.createElement('div',{className:'font-semibold'},new Date(ag.date).toLocaleDateString('nl-NL',{weekday:'long'})),
-                      React.createElement('div',{className:'text-xs text-slate-500'},new Date(ag.date).toLocaleDateString('nl-NL',{day:'2-digit',month:'short'}))
+
+            // horizontal slider (draggable)
+            React.createElement('div', { className: 'overflow-x-auto h-scroll flex gap-4 py-2 draggable-slider' },
+              aggs.map(ag => {
+                const color = mapScoreToColor(ag.score);
+                return React.createElement('div', { key: ag.date, className: `min-w-[320px] p-3 card ${color.classDay}` },
+                  React.createElement('div', { className: 'flex justify-between items-start mb-2' },
+                    React.createElement('div', null,
+                      React.createElement('div', { className: 'font-semibold' }, new Date(ag.date).toLocaleDateString('nl-NL', { weekday: 'long' })),
+                      React.createElement('div', { className: 'text-xs text-slate-500' }, new Date(ag.date).toLocaleDateString('nl-NL', { day: '2-digit', month: 'short' }))
                     ),
-                    ag.alert?React.createElement('div',{className:'alert-badge',style:{background:'var(--accent)'}},'⚠'):null
+                    ag.alert ? React.createElement('div', { className: 'alert-badge', style: { background: 'var(--accent)' }, title: 'Alert aanwezig' }, '⚠') : null
                   ),
-                  React.createElement('div',{className:'mb-3 text-sm'},ag.summary),
-                  React.createElement('div',{className:'grid grid-cols-3 gap-3'},
-                    ['morning','midday','evening'].map(part=>{
-                      const p=(arr.find(d=>d.date===ag.date)||{}).parts?.[part]||{};
-                      const wt=computeWindType(sp,p.wind_dir||ag.wind_dir);
-                      const s=computeScore({swell_m:p.swell_m||ag.swell_m,period_s:p.period_s||ag.period_s,wind_bft:p.wind_bft||ag.wind_bft,wind_type:wt});
-                      const qc=mapScoreToColor(s);
-                      return React.createElement('div',{key:part,className:`p-2 rounded ${qc.part}`},
-                        React.createElement('div',{className:'text-sm font-semibold capitalize'},part==='morning'?'Ochtend':part==='midday'?'Middag':'Avond'),
-                        React.createElement('div',{className:'text-xs'},`Golfhoogte: ${(p.swell_m||ag.swell_m).toFixed(1)} m`),
-                        React.createElement('div',{className:'text-xs'},`Periode: ${p.period_s||ag.period_s}s`),
-                        React.createElement('div',{className:'text-xs'},`Wind: ${p.wind_dir||ag.wind_dir} • ${bftToKmh(p.wind_bft||ag.wind_bft)} km/u`),
-                        React.createElement('div',{className:'text-xs'},`Type: ${wt}`),
-                        React.createElement('div',{className:'text-xs'},`Getij: —`)
-                      )
+
+                  // conclusion
+                  React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
+
+                  // parts: morning / midday / evening
+                  React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
+                    ['morning','midday','evening'].map(part => {
+                      const p = (arr.find(d => d.date === ag.date) || {}).parts?.[part] || {};
+                      const windType = computeWindType(sp, p.wind_dir || ag.wind_dir);
+                      const partScore = computeScore({ swell_m: p.swell_m || ag.swell_m, period_s: p.period_s || ag.period_s, wind_bft: p.wind_bft || ag.wind_bft, wind_type: windType });
+                      const partColor = mapScoreToColor(partScore);
+
+                      // wind in km/h (use provided wind_kmh if present, else convert BFT)
+                      const windKmh = (p.wind_kmh != null) ? Math.round(p.wind_kmh) : (p.wind_bft != null ? bftToKmh(p.wind_bft) : (ag.wind_bft != null ? bftToKmh(ag.wind_bft) : null));
+
+                      return React.createElement('div', { key: part, className: `p-3 ${partColor.classPart}` },
+                        React.createElement('div', { className: 'text-sm font-semibold capitalize mb-1' }, part === 'morning' ? 'Ochtend' : part === 'midday' ? 'Middag' : 'Avond'),
+                        React.createElement('div', { className: 'text-xs text-slate-400' }, 'Golfhoogte'),
+                        React.createElement('div', { className: 'font-semibold' }, (p.swell_m || ag.swell_m) ? `${(p.swell_m || ag.swell_m).toFixed(1)} m` : '—'),
+                        React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Swell Periode'),
+                        React.createElement('div', { className: 'font-semibold' }, (p.period_s || ag.period_s) ? `${p.period_s || ag.period_s}s` : '—'),
+                        React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Wind'),
+                        React.createElement('div', { className: 'font-semibold' }, `${p.wind_dir || ag.wind_dir || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`)
+                      );
                     })
                   )
-                )
+                );
               })
             )
-          )
+          );
         })
       );
     }

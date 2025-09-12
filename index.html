@@ -30,71 +30,10 @@
 </head>
 <body class="min-h-screen">
   <div class="p-6 max-w-7xl mx-auto">
-    <!-- Dropdown menu surfspots -->
-    <div class="relative inline-block text-left mb-6">
-      <button id="dropdownButton" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium hover:bg-gray-50">
-        Kies surfspots
-        <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      <div id="dropdownMenu" class="hidden origin-top-right absolute mt-2 w-64 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 max-h-80 overflow-y-auto">
-        <div class="p-2">
-          <!-- Zoekbalk -->
-          <input type="text" id="searchInput" placeholder="Zoek surfspot..." class="w-full border rounded-md p-2 mb-2 text-sm" />
-
-          <!-- Alles uitvinken knop -->
-          <button id="clearAll" class="w-full text-left text-xs text-red-500 mb-2 hover:underline">Alles uitvinken</button>
-
-          <!-- Lijst met surfspots -->
-          <div id="spotList" class="space-y-1 text-sm">
-            <label class="flex items-center"><input type="checkbox" class="mr-2 spot" checked value="Scheveningen"> Scheveningen</label>
-            <label class="flex items-center"><input type="checkbox" class="mr-2 spot" checked value="Wijk aan Zee"> Wijk aan Zee</label>
-            <label class="flex items-center"><input type="checkbox" class="mr-2 spot" checked value="Domburg"> Domburg</label>
-            <label class="flex items-center"><input type="checkbox" class="mr-2 spot" checked value="Texel"> Texel</label>
-            <label class="flex items-center"><input type="checkbox" class="mr-2 spot" checked value="Zandvoort"> Zandvoort</label>
-            <!-- Voeg hier jouw andere surfspots toe -->
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hier draait jouw bestaande React-app -->
     <div id="app"></div>
   </div>
 
-  <script>
-    const dropdownButton = document.getElementById("dropdownButton");
-    const dropdownMenu = document.getElementById("dropdownMenu");
-    const searchInput = document.getElementById("searchInput");
-    const clearAll = document.getElementById("clearAll");
-
-    dropdownButton.addEventListener("click", () => {
-      dropdownMenu.classList.toggle("hidden");
-    });
-
-    clearAll.addEventListener("click", () => {
-      document.querySelectorAll(".spot").forEach(cb => cb.checked = false);
-    });
-
-    searchInput.addEventListener("input", (e) => {
-      const filter = e.target.value.toLowerCase();
-      document.querySelectorAll("#spotList label").forEach(label => {
-        const text = label.textContent.toLowerCase();
-        label.style.display = text.includes(filter) ? "" : "none";
-      });
-    });
-
-    // Sluiten bij klik buiten dropdown
-    document.addEventListener("click", (e) => {
-      if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
-        dropdownMenu.classList.add("hidden");
-      }
-    });
-  </script>
-
-  <!-- Jouw React-app (blijft onaangetast, inclusief Supabase) -->
+  <!-- React app -->
   <script type="module" src="./react-app.js"></script>
 </body>
 </html>

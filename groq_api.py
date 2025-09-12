@@ -29,7 +29,7 @@ def _extract_json_object(text: str) -> str:
     return s[start:end+1]
 
 def groq_process_text(text):
-    prompt = f"""Je krijgt hieronder een informeel geschreven surfweerbericht in het Nederlands.
+    prompt = """Je krijgt hieronder een informeel geschreven surfweerbericht in het Nederlands.
     De tekst bevat afkortingen, spreektaal en losse zinnen, maar bevat belangrijke informatie
     over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België.
     
@@ -119,7 +119,7 @@ def groq_process_text(text):
 
     Invoer:
     <{text}>
-    """
+    """.format(text=text)
 
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],

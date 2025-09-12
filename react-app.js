@@ -224,7 +224,7 @@ function App(){
     // header
     window.React.createElement('header', { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' },
       window.React.createElement('div', { className: 'flex items-center gap-4' },
-        window.React.createElement('img', { src: './logo.jpg', alt: 'Logo', className: 'w-12 h-16 object-contain' }),
+        window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'w-12 h-16 object-contain' }),
         window.React.createElement('div', null,
           window.React.createElement('h1', { className: 'text-2xl font-medium' }, 'Surf Forecast'),
           window.React.createElement('div', { className: 'text-sm text-slate-600' }, errMsg ? `Fout: ${errMsg}` : 'AI gestuurde surfdata, recht op je beeldscherm!')

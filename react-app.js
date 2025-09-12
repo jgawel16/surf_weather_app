@@ -43,7 +43,12 @@ const getSpotMeta = (id) => (SPOTS_META[String(id||"").toLowerCase()] || { name:
 
 /* ===== Utils ===== */
 function degDiff(a,b){ let d = Math.abs(a-b) % 360; if(d>180) d = 360 - d; return d; }
-function parseWindDirString(dir){ if(!dir) return null; const t = String(dir).split(/[\/\s,]+/)[0].toUpperCase(); return { 'N':0,'NO':45,'O':90,'ZO':135,'Z':180,'ZW':225,'W':270,'NW':315 }[t] ?? null; }
+function parseWindDirString(dir){
+  if(!dir) return null;
+  const t = String(dir).split(/[\/\s,]+/)[0].toUpperCase();
+  const MAP = { 'N':0,'NNO':22.5,'NO':45,'ONO':67.5,'O':90,'OZO':112.5,'ZO':135,'ZZO':157.5,'Z':180,'ZZW':202.5,'ZW':225,'WZW':247.5,'W':270,'WNW':292.5,'NW':315,'NNW':337.5 };
+  return MAP[t] ?? null;
+}
 function computeWindType(spotMeta, windDirStr){
   const deg = parseWindDirString(windDirStr);
   if (deg === null) return 'unknown';
@@ -280,4 +285,44 @@ function App(){
                   ),
                   window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
                   window.React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
-                   
+                    ['morning','midday','evening'].map(part => {
+                      const p = (arr.find(d => d.date === ag.date) || {}).parts?.[part] || {};
+                      const windType = computeWindType(meta, p.wind_dir || ag.wind_dir);
+                      const partScore = computeScore({
+                        swell_m: (p.swell_m ?? ag.swell_m) ?? 0,
+                        period_s: (p.period_s ?? ag.period_s) ?? 0,
+                        wind_bft: (p.wind_bft ?? ag.wind_bft) ?? 0,
+                        wind_type: windType
+                      });
+                      const partColor = mapScoreToColor(partScore);
+                      const windKmh = (p.wind_kmh != null) ? Math.round(p.wind_kmh)
+                                    : (p.wind_bft != null ? bftToKmh(p.wind_bft)
+                                    : (ag.wind_bft != null ? bftToKmh(ag.wind_bft) : null));
+                      return window.React.createElement('div', { key: part, className: `p-3 ${partColor.classPart}` },
+                        window.React.createElement('div', { className: 'text-sm font-semibold capitalize mb-1' },
+                          part === 'midday' ? 'Middag' : part === 'morning' ? 'Ochtend' : 'Avond'
+                        ),
+                        window.React.createElement('div', { className: 'text-xs text-slate-400' }, 'Golfhoogte'),
+                        window.React.createElement('div', { className: 'font-semibold' },
+                          (p.swell_m ?? ag.swell_m) != null ? `${((p.swell_m ?? ag.swell_m)).toFixed(1)} m` : '—'
+                        ),
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Swell Periode'),
+                        window.React.createElement('div', { className: 'font-semibold' },
+                          (p.period_s ?? ag.period_s) != null ? `${(p.period_s ?? ag.period_s)}s` : '—'
+                        ),
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Wind'),
+                        window.React.createElement('div', { className: 'font-semibold' },
+                          `${p.wind_dir || ag.wind_dir || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
+                        )
+                      );
+                    })
+                  )
+                );
+              })
+            )
+          );
+        })
+  );
+}
+
+window.ReactDOM.createRoot(document.getElementById('app')).render(window.React.createElement(App));

@@ -97,16 +97,41 @@ async function loadFromSupabase(){
 function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const dropdownRef = window.React.useRef(null);
+
+  // klik buiten menu -> sluit
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const filteredIds = allSpotIds.filter(id =>
     (getSpotMeta(id).name || id).toLowerCase().includes(query.toLowerCase())
   );
 
-  function clearAll() {
-    selectedSpots.forEach(id => toggleSpot(id));
+  // "Alles" checkbox status
+  const allSelected = allSpotIds.length > 0 && selectedSpots.length === allSpotIds.length;
+
+  function toggleAll() {
+    if (allSelected) {
+      // alles uit
+      allSpotIds.forEach(id => {
+        if (selectedSpots.includes(id)) toggleSpot(id);
+      });
+    } else {
+      // alles aan
+      allSpotIds.forEach(id => {
+        if (!selectedSpots.includes(id)) toggleSpot(id);
+      });
+    }
   }
 
-  return window.React.createElement('div', { className: 'relative inline-block w-64' },
+  return window.React.createElement('div', { className: 'relative inline-block w-64', ref: dropdownRef },
     // knop
     window.React.createElement('button', {
       onClick: () => setOpen(!open),
@@ -127,10 +152,16 @@ function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
           value:query, onChange:e=>setQuery(e.target.value),
           className:'w-full border rounded-md p-1 text-sm'
         }),
-        window.React.createElement('button', {
-          onClick: clearAll,
-          className:'w-full text-left text-xs text-red-500 hover:underline'
-        }, 'Alles uitvinken'),
+        // "Alles" checkbox
+        window.React.createElement('label', { className:'flex items-center text-sm font-semibold border-b pb-1 mb-1' },
+          window.React.createElement('input', {
+            type:'checkbox',
+            checked: allSelected,
+            onChange: toggleAll,
+            className:'mr-2'
+          }),
+          'Alles'
+        ),
         filteredIds.length
           ? filteredIds.map(id =>
               window.React.createElement('label', { key:id, className:'flex items-center text-sm' },

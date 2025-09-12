@@ -38,12 +38,12 @@ Stap 1 — Uitspraken identificeren
 - Behoud de tekst exact zoals vermeld; maak geen interpretaties.
 
 Stap 2 — Locatie-hiërarchie toepassen
-- Gebruik een vooraf bekende lijst met hoofdlocaties en hun sublocaties. Bijvoorbeeld:
-  - Noord-Holland: Wijk aan Zee, IJmuiden, Zandvoort, Noordwijk, Wassenaar
-  - Zuid-Holland: Hoek van Holland, Scheveningen, Kijkduin, Ouddorp, Maasvlakte, Zandmotor zuid
+- Gebruik een vooraf bekende lijst met hoofdlocaties en hun sublocaties:
   - Zeeland: Domburg, Cadzand
+  - Zuid-Holland (Z-H): Hoek van Holland (HvH), Kijkduin, Ter Heijde, Scheveningen (Schev), Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid
+  - Noord-Holland (N-H): Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk (Nwijk), Zandvoort (Zvoort)
   - Wadden: Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
-  - België: Belgische spots
+  - België: De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist
 - Als een uitspraak over een hoofdlocatie gaat, koppel deze ook aan alle sublocaties, tenzij de
   tekst expliciet zegt dat de uitspraak niet voor een sublocatie geldt.
 
@@ -79,7 +79,7 @@ De value per locatie is een array van dag-objecten met exact deze structuur en k
 }}
 
 Stap 5.1 — Normalisatie & conversies
-- Locatie-keys: exacte spotnaam → lowercase; spaties behouden.
+- Locatie-keys: exacte spotnaam → lowercase; spaties behouden en normaliseer bekende varianten/typo’s: "oudorp" → "ouddorp", "hv h"/"hvh" → "hoek van holland", "wijk" (alleen als spot bedoeld) → "wijk aan zee", "zandmotor" → "zandmotor zuid" (alleen als dat in de tekst zo bedoeld is).
 - Dagdelen → parts: Ochtend → "morning", Middag → "midday", Avond → "evening".
 - Waarden:
   - swell_m: converteer cm naar meter (50cm → 0.5). Bij ranges neem gemiddelde en rond af op 1 decimaal.
@@ -87,7 +87,7 @@ Stap 5.1 — Normalisatie & conversies
   - period_s: parse numeriek in seconden; bij range → gemiddelde, afronden op geheel getal.
   - wind_bft: integer uit tekst.
   - wind_kmh: als niet genoemd → afleiden uit Beaufort via het midpoint van het officiële km/h-bereik, afgerond naar integer.
-  - wind_dir: exacte afkorting uit tekst (N, NO, O, ZO, Z, ZW, W, WNW, etc.).
+  - wind_dir: exacte afkorting uit tekst; **converteer naar UPPERCASE** (bijv. "z", "zzo", "wzw" → "Z", "ZZO", "WZW").
 - alert: true bij expliciete waarschuwingen ("gevaarlijk", "geen beginners", "niet te doen", "stroomt hard", "af te raden").
   Anders false.
 - Als een waarde niet genoemd is én geen afleidingsregel geldt → laat het veld weg (niet null).

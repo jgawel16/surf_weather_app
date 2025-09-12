@@ -14,7 +14,7 @@ def groq_process_text(text):
     De tekst bevat afkortingen, spreektaal en losse zinnen, maar bevat belangrijke informatie
     over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België.
     
-    Je taak: Zet deze informatie om naar een gestructureerde JSON-array met de opgegeven velden,
+    Je taak: Zet deze informatie om naar een gestructureerd JSON-object met de opgegeven velden,
     maar voordat je de JSON maakt, doorloop je eerst een bundelstap per locatie zodat informatie
     op verschillende niveaus (regio ↔ specifieke spot) correct wordt gecombineerd.
     
@@ -49,46 +49,54 @@ def groq_process_text(text):
       - Dagnamen (NL): maandag, dinsdag, woensdag, donderdag, vrijdag, zaterdag, zondag.
     - Noteer de datum in ISO-formaat YYYY-MM-DD.
     
-    Stap 5 — Vul de JSON-array
-    Maak voor elke unieke combinatie van Datum + Locatie + Dagdeel een JSON-object met exact deze velden, en in exact deze volgorde:
-    1. "Datum" — ISO-formaat YYYY-MM-DD (expliciet genoemd of afgeleid via Stap 4)
-    2. "Dag" — bijvoorbeeld "Dinsdag", "Woensdag"
-    3. "Locatie" — exacte naam uit de tekst (of sublocatie volgens hiërarchie)
-    4. "Dagdeel" — bijvoorbeeld "Ochtend", "Middag", "Avond" (alleen als expliciet genoemd)
-    5. "Wind" — exacte waarde zoals in de tekst, inclusief bft en tekens
-    6. "Wind richting" — exacte richting zoals in de tekst
-    7. "Getij " — exacte term zoals in de tekst
-    8. "Getij score" — bijvoorbeeld "Goed", "Medium"
-    9. "Golf hoogte" — exact zoals vermeld, bijv. "1-1,5m", "flat", "weinig", "heuphoogte"
-    10. "Clean" — "Ja", "Nee", of leeg als niet expliciet benoemd
-    11. "Swell" — exact zoals vermeld, bijv. "2m"
-    12. "Periode" — exact zoals vermeld
-    13. "Gaan Pro" — exacte tekst over aanbevolen tijden/condities voor ervaren surfers
-    14. "Gaan beginner" — idem voor beginners
+    Stap 5 — Bouw de outputstructuur
+    Produceer één JSON-object met locaties als keys (lowercase, spaties behouden; alleen sublocaties als key).
+    De value per locatie is een array van dag-objecten met exact deze structuur en key-volgorde:
     
-    Regels:
-    - Gebruik uitsluitend informatie die letterlijk in de tekst staat, met uitzondering van de datum-afleiding in Stap 4.
-    - Geen verdere aannames of interpretaties toevoegen.
-    - Als een veld niet wordt genoemd: waarde = null.
-    - Splits records per locatie én per dagdeel.
-    - Neem tekstwaarden exact over, inclusief afkortingen, spaties en leestekens.
-    - Voeg geen extra context, uitleg of mening toe.
-    - Output moet uitsluitend een JSON-array zijn met bovenstaande velden in exact deze volgorde.
-
-    **Stap 6 — Validatie en correctie**
-    - Controleer vóór het teruggeven van de output of:
-      1. Alle vereiste velden aanwezig zijn in elk object.
-      2. De volgorde van de velden exact gelijk is aan de volgorde die vermeld staat in Stap 5.
-      3. Er geen extra velden aanwezig zijn.
-      4. De output een geldige JSON-array is.
-    - Indien één van deze checks faalt, corrigeer dan de output automatisch zodat deze volledig voldoet.
+    {
+      "<locatie in lowercase>": [
+        {
+          "date": "YYYY-MM-DD",
+          "alert": <boolean>,
+          "parts": {
+            "morning": { "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>" },
+            "midday":  { ...zelfde velden... },
+            "evening": { ...zelfde velden... }
+          }
+        },
+        ...
+      ],
+      ...
+    }
+    
+    Stap 5.1 — Normalisatie & conversies
+    - Locatie-keys: exacte spotnaam → lowercase; spaties behouden.
+    - Dagdelen → parts: Ochtend → "morning", Middag → "midday", Avond → "evening".
+    - Waarden:
+      - swell_m: converteer cm naar meter (50cm → 0.5). Bij ranges neem gemiddelde en rond af op 1 decimaal. Bij vage termen ("klein", "flat") veld weglaten.
+      - period_s: parse numeriek in seconden; bij range → gemiddelde, afronden op geheel getal.
+      - wind_bft: integer uit tekst.
+      - wind_kmh: als niet genoemd → afleiden uit Beaufort via midpoint officiële km/h-range, afgerond naar integer.
+      - wind_dir: exacte afkorting uit tekst (N, NO, ZO, Z, ZW, W, WNW, etc.).
+    - alert: true bij expliciete waarschuwingen ("gevaarlijk", "geen beginners", "niet te doen", "stroomt hard", "af te raden"). Anders false.
+    - Als een waarde niet genoemd is én geen afleidingsregel geldt → veld helemaal weglaten.
+    
+    Stap 6 — Validatie en correctie
+    Controleer vóór het teruggeven van de output of:
+    1. Top-level een JSON-object is met locatie-keys.
+    2. Elke value een array is van dag-objecten met exact de keys "date", "alert", "parts".
+    3. "date" een geldige ISO-datum is.
+    4. "alert" een boolean is.
+    5. "parts" alleen keys "morning", "midday", "evening" bevat.
+    6. Binnen elk part alleen de velden "swell_m", "period_s", "wind_bft", "wind_kmh", "wind_dir" aanwezig zijn, met juiste types.
+    Corrigeer automatisch als dit niet klopt.
     
     Uitvoervereiste:
-    - Geef uitsluitend de JSON-array terug.
-    - Voeg geen inleidende tekst, verklaringen, tussenstappen of extra output toe. Alleen de array.
+    - Geef uitsluitend het JSON-object terug in dit exacte formaat.
+    - Geen inleidende tekst, geen tussenstappen, geen extra uitleg. Alleen het JSON-object.
     
     Uitvoer:
-    [JSON-array met gestructureerde gegevens]
+    JSON-object
 
     Invoer:
     <{text}>

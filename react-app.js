@@ -270,11 +270,11 @@ function App(){
   return window.React.createElement('div', { className: 'space-y-6' },
 // header
 window.React.createElement('header', { className: 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' },
-  window.React.createElement('div', { className: 'flex flex-col items-start sm:items-center gap-2' },
+  window.React.createElement('div', { className: 'flex flex-col items-center text-center gap-2 flex-1' },
     window.React.createElement('img', { 
       src: './Ingezoomd logo.png', 
       alt: 'Surf Forecast logo', 
-      className: 'max-h-16 sm:max-h-20 w-auto object-contain'
+      className: 'max-h-12 sm:max-h-14 w-auto object-contain' // 🔹 kleiner logo
     }),
     window.React.createElement('div', { className: 'text-sm text-slate-600' }, 
       errMsg ? `Fout: ${errMsg}` : 'AI gestuurde surfdata, recht op je beeldscherm!'
@@ -285,7 +285,6 @@ window.React.createElement('header', { className: 'flex flex-col sm:flex-row sm:
     window.React.createElement('input', { type: 'checkbox', checked: filterBest, onChange: e => setFilterBest(e.target.checked) })
   )
 ),
-
     // favorieten → dropdown
     window.React.createElement('section', { className: 'card p-4' },
       window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),

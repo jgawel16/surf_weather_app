@@ -39,10 +39,11 @@ const SPOTS_META = {
   "ter heijde": { name: "Ter Heijde", region: "Z-H", shoreBearing: 260 }
 };
 const DEFAULT_META = { name: null, region: null, shoreBearing: 260 };
-const getSpotMeta = (id) => (SPOTS_META[String(id||"").toLowerCase()] || { name: id, ...DEFAULT_META });
+const getSpotMeta = (id) =>
+  SPOTS_META[String(id || "").toLowerCase()] || { name: id, ...DEFAULT_META };
 
 /* ===== Utils ===== */
-function degDiff(a,b){ let d = Math.abs(a-b) % 360; if(d>180) d = 360 - d; return d; }
+function degDiff(a, b) { let d = Math.abs(a - b) % 360; if (d > 180) d = 360 - d; return d; }
 function parseWindDirString(dir){
   if(!dir) return null;
   const t = String(dir).split(/[\/\s,]+/)[0].toUpperCase();
@@ -58,7 +59,7 @@ function computeWindType(spotMeta, windDirStr){
   return 'crossshore';
 }
 function bftToKmh(bft){ if(bft == null || isNaN(bft)) return null; return Math.round(3.0096 * Math.pow(Number(bft), 1.5)); }
-function computeScore({swell_m, period_s, wind_bft, wind_type}){
+function computeScore({ swell_m, period_s, wind_bft, wind_type }){
   let score = 0;
   if (swell_m >= 1.2) score += 2; else if (swell_m >= 0.6) score += 1;
   if (period_s >= 9) score += 1; else if (period_s >= 7) score += 0.5;
@@ -228,7 +229,9 @@ function App(){
 
   function computeDayAgg(spotId, dayEntry){
     const meta = getSpotMeta(spotId);
-    const partsArr = ['morning','midday','evening'].map(k => (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : {swell_m:0,period_s:0,wind_bft:0,wind_dir:null});
+    const partsArr = ['morning','midday','evening'].map(k =>
+      (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : {swell_m:0,period_s:0,wind_bft:0,wind_dir:null}
+    );
     const swell_avg = partsArr.reduce((a,p) => a + (p.swell_m||0), 0) / partsArr.length;
     const period_avg = Math.round(partsArr.reduce((a,p) => a + (p.period_s||0), 0) / partsArr.length);
     const wind_bft_avg = Math.round(partsArr.reduce((a,p) => a + (p.wind_bft||0), 0) / partsArr.length);
@@ -268,40 +271,42 @@ function App(){
   const allSpotIds = Object.keys(data || {});
 
   return window.React.createElement('div', { className: 'space-y-6' },
-// header
-window.React.createElement('header', { className: 'flex flex-col items-center gap-2' },
-  window.React.createElement('img', {
-    src: './Ingezoomd logo.png',
-    alt: 'Surf Forecast logo',
-    className: 'h-8 sm:h-10 w-auto object-contain'
-  }),
-  window.React.createElement('div', { className: 'text-sm text-slate-600 text-center' },
-    errMsg ? `Fout: ${errMsg}` : 'AI gestuurde surfdata, recht op je beeldscherm!'
-  )
-),
-// favorieten → dropdown + beste spots toggle
-window.React.createElement('section', { className: 'card p-4' },
-  window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
-  window.React.createElement('div', { className: 'flex flex-col sm:flex-row gap-3' },
-    // dropdown
-    window.React.createElement(SpotDropdown, { allSpotIds, selectedSpots, toggleSpot, loading }),
-    // toggle beste spots in dezelfde stijl
-    window.React.createElement('label', { 
-      className: 'w-64 flex items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm cursor-pointer'
-    },
-      window.React.createElement('input', { 
-        type: 'checkbox', 
-        checked: filterBest, 
-        onChange: e => setFilterBest(e.target.checked),
-        className: 'mr-2'
-      }),
-      'Toon beste spots'
-    )
-  )
-),
 
-    // content
-    loading
+    // ===== HEADER (GEEN toggle meer hier) =====
+    window.React.createElement('header', { className: 'flex flex-col items-center gap-2' },
+      window.React.createElement('img', {
+        src: './Ingezoomd logo.png',
+        alt: 'Surf Forecast logo',
+        className: 'h-8 sm:h-10 w-auto object-contain'
+      }),
+      window.React.createElement('div', { className: 'text-sm text-slate-600 text-center' },
+        errMsg ? `Fout: ${errMsg}` : 'AI gestuurde surfdata, recht op je beeldscherm!'
+      )
+    ),
+
+    // ===== FAVORIETEN: dropdown + toggle in hetzelfde kaartje =====
+    window.React.createElement('section', { className: 'card p-4' },
+      window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
+      window.React.createElement('div', { className: 'flex flex-col sm:flex-row gap-3' },
+        // dropdown
+        window.React.createElement(SpotDropdown, { allSpotIds, selectedSpots, toggleSpot, loading }),
+        // toggle in zelfde stijl als dropdown
+        window.React.createElement('label', {
+          className: 'w-64 flex items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm cursor-pointer'
+        },
+          window.React.createElement('input', {
+            type: 'checkbox',
+            checked: filterBest,
+            onChange: e => setFilterBest(e.target.checked),
+            className: 'mr-2'
+          }),
+          'Toon beste spots'
+        )
+      )
+    ),
+
+    // ===== CONTENT =====
+    (loading
       ? window.React.createElement('div', { className: 'text-center py-16' }, 'Laden…')
       : spotsToShow().map(spotId => {
           const arr = data[spotId] || [];
@@ -364,6 +369,7 @@ window.React.createElement('section', { className: 'card p-4' },
             )
           );
         })
+    )
   );
 }
 

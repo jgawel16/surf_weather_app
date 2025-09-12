@@ -186,9 +186,47 @@ function App(){
     try { localStorage.setItem('fav_spots_v2', JSON.stringify(selectedSpots)); } catch {}
   }, [selectedSpots]);
 
-  // toggle
   function toggleSpot(id){
     setSelectedSpots(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]);
+  }
+
+  function computeDayAgg(spotId, dayEntry){
+    const meta = getSpotMeta(spotId);
+    const partsArr = ['morning','midday','evening'].map(k => (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : {swell_m:0,period_s:0,wind_bft:0,wind_dir:null});
+    const swell_avg = partsArr.reduce((a,p) => a + (p.swell_m||0), 0) / partsArr.length;
+    const period_avg = Math.round(partsArr.reduce((a,p) => a + (p.period_s||0), 0) / partsArr.length);
+    const wind_bft_avg = Math.round(partsArr.reduce((a,p) => a + (p.wind_bft||0), 0) / partsArr.length);
+    const wind_dir = partsArr[1]?.wind_dir || partsArr[0]?.wind_dir || partsArr[2]?.wind_dir || null;
+    const wind_type = computeWindType(meta, wind_dir);
+    const score = computeScore({ swell_m: swell_avg, period_s: period_avg, wind_bft: wind_bft_avg, wind_type });
+    return {
+      date: dayEntry.date,
+      parts: dayEntry.parts,
+      alert: !!dayEntry.alert,
+      swell_m: isFinite(swell_avg) ? +swell_avg.toFixed(2) : null,
+      period_s: isFinite(period_avg) ? period_avg : null,
+      wind_bft: isFinite(wind_bft_avg) ? wind_bft_avg : null,
+      wind_dir,
+      wind_type,
+      score,
+      summary: buildConclusion({ score })
+    };
+  }
+
+  function spotsToShow(){
+    const allKeys = Object.keys(data || {});
+    const active = selectedSpots.length ? allKeys.filter(s => selectedSpots.includes(s)) : allKeys;
+    if (!filterBest || !allKeys.length) return active;
+    const today = new Date().toISOString().slice(0,10);
+    let bestSpot = null, bestScore = -1;
+    active.forEach(spotId => {
+      const arr = data[spotId] || [];
+      const todayEntry = arr.find(d => d.date === today);
+      if (!todayEntry) return;
+      const agg = computeDayAgg(spotId, todayEntry);
+      if (agg.score > bestScore){ bestScore = agg.score; bestSpot = spotId; }
+    });
+    return bestSpot ? [bestSpot, ...active.filter(s => s !== bestSpot)] : active;
   }
 
   const allSpotIds = Object.keys(data || {});
@@ -209,15 +247,37 @@ function App(){
       )
     ),
 
-    // favorieten → nu dropdown
+    // favorieten → dropdown
     window.React.createElement('section', { className: 'card p-4' },
       window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
       window.React.createElement(SpotDropdown, { allSpotIds, selectedSpots, toggleSpot, loading })
     ),
 
-    // content (zelfde als jouw code, niet opnieuw helemaal uitgeschreven ivm lengte)
-    // ...
-  );
-}
-
-window.ReactDOM.createRoot(document.getElementById('app')).render(window.React.createElement(App));
+    // content
+    loading
+      ? window.React.createElement('div', { className: 'text-center py-16' }, 'Laden…')
+      : spotsToShow().map(spotId => {
+          const arr = data[spotId] || [];
+          const meta = getSpotMeta(spotId);
+          const aggs = arr.map(d => computeDayAgg(spotId, d));
+          return window.React.createElement('section', { key: spotId, className: 'card p-4' },
+            window.React.createElement('div', { className: 'flex justify-between mb-3' },
+              window.React.createElement('div', null,
+                window.React.createElement('div', { className: 'text-lg font-medium' }, meta.name || spotId),
+                window.React.createElement('div', { className: 'text-xs text-slate-500' }, meta.region || '')
+              )
+            ),
+            window.React.createElement('div', { className: 'overflow-x-auto h-scroll flex gap-4 py-2 draggable-slider' },
+              aggs.map(ag => {
+                const color = mapScoreToColor(ag.score);
+                return window.React.createElement('div', { key: ag.date, className: `min-w-[320px] p-3 card ${color.classDay}` },
+                  window.React.createElement('div', { className: 'flex justify-between items-start mb-2' },
+                    window.React.createElement('div', null,
+                      window.React.createElement('div', { className: 'font-semibold' }, new Date(ag.date).toLocaleDateString('nl-NL', { weekday: 'long' })),
+                      window.React.createElement('div', { className: 'text-xs text-slate-500' }, new Date(ag.date).toLocaleDateString('nl-NL', { day: '2-digit', month: 'short' }))
+                    ),
+                    ag.alert ? window.React.createElement('div', { className: 'alert-badge', style: { background: 'var(--accent)' }, title: 'Alert aanwezig' }, '⚠') : null
+                  ),
+                  window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
+                  window.React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
+                   

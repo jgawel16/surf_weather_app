@@ -23,138 +23,81 @@ def _extract_json_object(text: str) -> str:
 def groq_process_text(text):
     # BELANGRIJK: alle letterlijke accolades in het voorbeeld hieronder zijn gedubbeld {{ }}
     
-    prompt="""Je krijgt hieronder een informeel geschreven surfweerbericht in het Nederlands. 
-    De tekst bevat afkortingen, spreektaal en losse zinnen, maar bevat belangrijke informatie
-    over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België.
+    prompt="""Je krijgt hieronder een informeel surfweerbericht in het Nederlands. De tekst bevat essentiële informatie over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België. De tekst is echter slordig geschreven en bevat afkortingen, cryptische omschrijvingen en soms halve zinnen.
     
-    Je taak: Zet deze informatie om naar een gestructureerd JSON-object met de opgegeven velden,
-    maar voordat je de JSON maakt, doorloop je eerst bundelstappen zodat informatie
-    op verschillende niveaus (regio ↔ specifieke spot, hele dag ↔ dagdelen) correct wordt gecombineerd.
+    Doel: zet deze informatie om naar één gestructureerd JSON-object volgens de regels hieronder.
     
-    Stap 1 — Uitspraken identificeren
-    - Splits de tekst in losse uitspraken die concrete gegevens bevatten over surfcondities
-      (wind, tij, golfhoogte, clean, tijden, swell, etc.).
-    - Noteer bij elke uitspraak: Locatie(s), Dag, Dagdeel (indien genoemd), en de exacte parameters
-      zoals in de tekst.
-    - Behoud de tekst exact zoals vermeld; maak geen interpretaties.
+    1. **Normalisatie & hiërarchie**  
+       - Normaliseer varianten en schrijfwijzen naar de juiste plaatsnaam. Bijvoorbeeld:
+        - “HvH”, “hvh”, “hoek vh” → “Hoek van Holland”
+        - “Schev”, “schev n”, “scheveningen noord” → “Scheveningen”
+        - “wijk”, “wijk aan” → “Wijk aan Zee”
+        - “zvoort” → “Zandvoort”
+       - Hiërarchie:  koppel uitspraken over locaties op het niveau van landen, provincies, en regio's aan de corresponderende plaatsnamen:
+        - Zeeland → Domburg, Cadzand
+        - Zuid-Holland of Z-H → Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid
+        - Noord-Holland of N-H → Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort
+        - Wadden → Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
+        - België of BE → De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist
+       - Algemene uitspraken waar geen locatie wordt genoemd, gelden voor alle locaties, tenzij een specifieke uitspraak deze overschrijft.
     
-    Stap 2 — Locatie-bepaling
-    2.1 Gebruik uitsluitend deze lijst met plaatsnamen als eindpunten:
-    Domburg, Cadzand, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog, De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist.
+    2. **Locaties**  
+        Gebruik uitsluitend en exact deze lijst als keys (lowercase, spaties behouden): domburg, cadzand, hoek van holland, kijkduin, ter heijde, scheveningen, katwijk, wassenaar, ouddorp, maasvlakte, zandmotor zuid, wijk aan zee, ijmuiden, egmond, bergen, petten, noordwijk, zandvoort, texel, vlieland, terschelling, ameland, schiermonnikoog, de panne, middelkerke, oostende, zeebrugge, knokke-heist.
+        → Alle 27 moeten in de output voorkomen. Als er geen info over een locatie is: array met één object waarin date=null, alert=false, en elke waarde binnen parts = null.
     
-    → Elke uitspraak uit de tekst moet uiteindelijk aan minstens één van deze plaatsnamen gekoppeld worden.  
-    → Alle 27 plaatsnamen MOETEN voorkomen in de output. Als een plaatsnaam nergens voorkomt en ook niet via hiërarchie gekoppeld kan worden, vul daar een record met `null` waarden in.
+    3. **Datum**  
+        - Als expliciete datum genoemd is → gebruik die.  
+        - Als alleen weekdag genoemd is → pak de eerstvolgende kalenderdatum met die dag, relatief ten opzichte van vandaag (op uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
+        - Notatie: ISO (YYYY-MM-DD).
     
-    2.2 Normaliseer varianten en schrijfwijzen naar de juiste plaatsnaam:
-    - “HvH”, “hvh”, “hoek vh” → “Hoek van Holland”
-    - “Schev”, “schev n”, “scheveningen noord” → “Scheveningen”
-    - “wijk”, “wijk aan” → “Wijk aan Zee”
-    - “zvoort” → “Zandvoort”
-    - “nwijk” → “Noordwijk”
-    - “oudorp” → “Ouddorp”
-    - “zandmotor” (zonder toevoeging) → “Zandmotor zuid”
-    Enz. (altijd naar de exacte schrijfwijze uit de lijst).
+    4. **Alert**
+        Alert: true bij expliciete waarschuwingen ("gevaarlijk", "geen beginners", "niet te doen", "stroomt hard", "af te raden"). Als er geen info is → alert=false.
     
-    2.3 Hiërarchie voor mapping:
-    Als een uitspraak een hoger niveau noemt (bijv. “Zeeland”, “Z-H”, “Noord-Holland”, “België”, “Wadden”, of “Nederland algemeen”), dan koppel die info automatisch aan alle bijbehorende plaatsnamen:
-    - Zeeland → Domburg, Cadzand
-    - Zuid-Holland / Z-H → Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid
-    - Noord-Holland / N-H → Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort
-    - Wadden → Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
-    - België / BE → De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist
+    5. **Dagdelen & tijden**
+        Gebruik exact: morning (06:00–11:59), midday (12:00–17:59), evening (18:00–23:59).
+        - Als alleen dag genoemd is → geldt voor alle dagdelen.  
+        - Als tijd genoemd is → map naar bijbehorend dagdeel.
+        - Meerdere tijden/dagdelen → splits in aparte records.
     
-    Algemene uitspraken gelden voor al deze plaatsnamen, tenzij de tekst expliciet zegt dat een bepaalde spot afwijkt.
+    6. **Parameters**
+        De belangrijkste regel is dat er nergens interpretaties gemaakt mogen worden. Gebruik exact deze parameters:
+        - swell_m: converteer cm naar meter (50cm → 0.5). Bij ranges neem gemiddelde en rond af op 1 decimaal.  Bij vage termen ("klein", "flat"), of geen data → null. 
+        - period_s: parse numeriek in seconden; bij range → gemiddelde, afronden op geheel getal. Geen data → null.
+        - wind_bft: integer uit tekst. Geen data → null.
+        - wind_kmh: Geen data → null.
+        - wind_dir: windrichting uit tekst vertalen naar een officiële windrichting uit de lijst: [N, NNO, NO, ONO, O, OZO, ZO, ZZO, Z, ZZW, ZW, WZW, W, WNW, NW, NNW]. Altijd converteren naar UPPERCASE (bijv. "z", "zzo", "wzw" → "Z", "ZZO", "WZW"). Geen data → null.
+        - tide: exacte term zoals in de tekst. Geen data → null.
+        - tide_score: alleen één van deze waarden: "slecht", "medium", "goed". Mapping: bv. "pas goed na 9u" → "goed". Geen data → null.
+        - wave_height: exact zoals vermeld in de tekst (bijv. "1-1,5m", "flat", "weinig", "heuphoogte"). Geen data → null. 
+        - clean: "ja", "nee", of `null`. Voorbeelden: "clean kansen" → "ja", "niet zeker clean" → "nee". Geen data → null.
+        - go_advanced: exacte tekstfragmenten die advies bevatten voor ervaren surfers. Indien meerdere, combineer als string of array. Geen data → null.
+        - go_beginner: exacte tekstfragmenten die advies bevatten voor beginners. Indien meerdere, combineer als string of array. Geen data → null.
     
-    2.4 Bundeling en conflicten:
-    - Algemene uitspraken vormen de basis (bv. “in Z-H veel wind”).
-    - Specifieke uitspraken overschrijven of vullen aan.
-    - Tegenstrijdige uitspraken splits je in aparte records (bv. ochtend slecht, middag goed).
-    
-    Stap 3 — Dagdeel-bepaling
-    3.1 Gebruik uitsluitend deze dagdelen als eindpunten: morning, midday, evening.  
-    
-    3.2 Mapping van tijd naar dagdeel:
-    - morning: 06:00–11:59
-    - midday: 12:00–17:59
-    - evening: 18:00–23:59
-    
-    3.3 Hiërarchie voor mapping:
-    - Als een uitspraak expliciet een dagdeel noemt (ochtend, middag, avond) → koppel daar direct aan.
-    - Als alleen een tijdstip genoemd wordt (bijv. “14:30u”) → vertaal dit naar het juiste dagdeel volgens bovenstaande tijdsindeling.
-    - Als alleen een dag genoemd wordt, zonder dagdeel of tijd → geldt dit voor ALLE dagdelen van die dag.
-    - Als meerdere dagdelen/tijden worden genoemd, splits deze in aparte records.
-    
-    Stap 4 — Datum bepalen
-    - Normaal gebruik je uitsluitend informatie die letterlijk in de tekst staat.
-    - ENIGE UITZONDERING: als er géén expliciete datum wordt genoemd maar wél een dag (bijv. "maandag"),
-      bepaal dan de datum als de eerstvolgende kalenderdatum met die dag, relatief ten opzichte van
-      vandaag (op uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
-    - Dagnamen (NL): maandag, dinsdag, woensdag, donderdag, vrijdag, zaterdag, zondag.
-    - Noteer de datum in ISO-formaat YYYY-MM-DD.
-    
-    Stap 5 — Bouw de outputstructuur
-    Produceer één JSON-object met locaties als keys (lowercase, spaties behouden; alleen sublocaties als key).
-    De value per locatie is een array van dag-objecten met exact deze structuur en key-volgorde:
-    
-    {{
-      "<locatie in lowercase>": [
-        {{
-          "date": "YYYY-MM-DD",
-          "alert": <boolean>,
-          "parts": {{
-            "morning": {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }}, 
-            "midday":   {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }},
-            "evening":  {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }}
-          }}
+    7. **Outputstructuur**  
+       Waarde = JSON-object met locaties als keys. De value per locatie is een array van dag-objecten. Alle 27 locaties uit de lijst in punt 2 moeten altijd aanwezig zijn als key in het JSON-object, ook als er geen informatie voor die locatie in de tekst staat. In dat geval moet de value een array zijn met één object waarin "date"=null, "alert"=false, en alle velden binnen "parts"=null. Gebruik exact deze structuur, benaming, en key-volgorde: 
+       {{
+          "<locatie in lowercase>": [
+            {{
+              "date": "YYYY-MM-DD",
+              "alert": <boolean>,
+              "parts": {{
+                "morning": {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }}, 
+                "midday": {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }},
+                "evening": {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }}
+              }}
+            }}
+          ]
         }}
-      ]
-    }}
     
-    Stap 6 — Normalisatie & conversies
-    - Locatie-keys: exacte plaatsnaam → lowercase; spaties behouden en normaliseer bekende varianten/typo’s.
-    - Dagdelen → parts: Ochtend → "morning", Middag → "midday", Avond → "evening".
-    - Waarden:
-      - swell_m: converteer cm naar meter (50cm → 0.5). Bij ranges neem gemiddelde en rond af op 1 decimaal.  Bij vage termen ("klein", "flat"), of niet benoemd, het veld `null` maken. 
-      - period_s: parse numeriek in seconden; bij range → gemiddelde, afronden op geheel getal. Veld null maken als dit niet benoemd wordt. 
-      - wind_bft: integer uit tekst. Veld null maken als dit niet benoemd wordt. 
-      - wind_kmh: veld null maken als dit niet benoemd wordt.
-      - wind_dir: windrichting uit tekst vertalen naar een officiële windrichting uit de lijst: NNO, ONO, OZO, ZZO, ZZW, WZW, WNW, NWN. Altijd converteren naar UPPERCASE (bijv. "z", "zzo", "wzw" → "Z", "ZZO", "WZW"). Veld null maken als dit niet benoemd wordt. 
-      - tide: exacte term zoals in de tekst.
-      - tide_score: alleen één van deze waarden: "slecht", "medium", "goed". Mapping: bv. "pas goed na 9u" → "goed".
-      - wave_height: exact zoals vermeld in de tekst (bijv. "1-1,5m", "flat", "weinig", "heuphoogte").
-      - clean: "ja", "nee", of `null`. Voorbeelden: "clean kansen" → "ja", "niet zeker clean" → "nee".
-      - go_advanced: exacte tekstfragmenten die advies bevatten voor ervaren surfers. Indien meerdere, combineer als string of array.
-      - go_beginner: exacte tekstfragmenten die advies bevatten voor beginners. Indien meerdere, combineer als string of array.
-    - alert: true bij expliciete waarschuwingen ("gevaarlijk", "geen beginners", "niet te doen", "stroomt hard", "af te raden").
-      Anders false.
-    - Als een waarde niet genoemd is én geen afleidingsregel geldt → maak het veld `null`.
-    - Neem alleen parts op die expliciet genoemd zijn.
-    
-    Stap 7 — Validatie en correctie
-    Controleer vóór het teruggeven van de output of:
-    1. Top-level een JSON-object is met locatie-keys (alle 27 moeten aanwezig zijn).
-    2. Elke value een array is van dag-objecten met exact de keys "date", "alert", "parts".
-    3. "date" een geldige ISO-datum is.
-    4. "alert" een boolean is.
-    5. "parts" bevat alleen de keys "morning", "midday", "evening" (indien aanwezig).
-    6. Binnen elk part komen alleen de volgende velden voor: "swell_m", "period_s", "wind_bft", "wind_kmh", "wind_dir", "tide", "tide_score", "wave_height", "clean", "go_advanced", "go_beginner". 
-    Corrigeer automatisch als dit niet klopt.
-    
-    Uitvoervereiste:
-    - Geef uitsluitend één geldig JSON-object terug, zonder markdown-codeblokken, zonder comments, en zonder extra tekst. 
-    - Geen inleidende tekst, geen tussenstappen, geen extra uitleg. Alleen het JSON-object.
-    
-    Uitvoer:
-    JSON-object
-    
-    Invoer:
-    <{text}>
+    Invoer: 
+    <<<{text}>>>
     """.format(text=text)
 
     chat_completion = client.chat.completions.create(
         messages=[{"role": "user", "content": prompt}],
         model="llama-3.3-70b-versatile",
         stream=False,
+        response_format={"type": "json_object"},
         temperature=0.2,
     )
     content = chat_completion.choices[0].message.content

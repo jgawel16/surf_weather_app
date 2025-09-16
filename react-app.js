@@ -42,6 +42,10 @@ const DEFAULT_META = { name: null, region: null, shoreBearing: 260 };
 const getSpotMeta = (id) =>
   SPOTS_META[String(id || "").toLowerCase()] || { name: id, ...DEFAULT_META };
 
+const PART_KEYS = ["ochtend", "middag", "avond"];
+const PART_LABELS = { ochtend: "Ochtend", middag: "Middag", avond: "Avond" };
+const DEFAULT_PART_VALUES = { swell_m: 0, period_s: 0, wind_bft: 0, wind_dir: null };
+
 /* ===== Utils ===== */
 function degDiff(a, b) { let d = Math.abs(a - b) % 360; if (d > 180) d = 360 - d; return d; }
 function parseWindDirString(dir){
@@ -229,8 +233,8 @@ function App(){
 
   function computeDayAgg(spotId, dayEntry){
     const meta = getSpotMeta(spotId);
-    const partsArr = ['morning','midday','evening'].map(k =>
-      (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : {swell_m:0,period_s:0,wind_bft:0,wind_dir:null}
+    const partsArr = PART_KEYS.map(k =>
+      (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : DEFAULT_PART_VALUES
     );
     const swell_avg = partsArr.reduce((a,p) => a + (p.swell_m||0), 0) / partsArr.length;
     const period_avg = Math.round(partsArr.reduce((a,p) => a + (p.period_s||0), 0) / partsArr.length);
@@ -332,8 +336,8 @@ function App(){
                   ),
                   window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
                   window.React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
-                    ['morning','midday','evening'].map(part => {
-                      const p = (arr.find(d => d.date === ag.date) || {}).parts?.[part] || {};
+                    PART_KEYS.map(part => {
+                      const p = ag.parts?.[part] || {};
                       const windType = computeWindType(meta, p.wind_dir || ag.wind_dir);
                       const partScore = computeScore({
                         swell_m: (p.swell_m ?? ag.swell_m) ?? 0,
@@ -347,7 +351,7 @@ function App(){
                                     : (ag.wind_bft != null ? bftToKmh(ag.wind_bft) : null));
                       return window.React.createElement('div', { key: part, className: `p-3 ${partColor.classPart}` },
                         window.React.createElement('div', { className: 'text-sm font-semibold capitalize mb-1' },
-                          part === 'midday' ? 'Middag' : part === 'morning' ? 'Ochtend' : 'Avond'
+                          PART_LABELS[part] || part
                         ),
                         window.React.createElement('div', { className: 'text-xs text-slate-400' }, 'Golfhoogte'),
                         window.React.createElement('div', { className: 'font-semibold' },

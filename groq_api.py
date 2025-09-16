@@ -4,6 +4,212 @@ import re
 import json
 from groq import Groq
 
+PROMPT1_TEMPLATE = """Je krijgt hieronder een informeel surfweerbericht in het Nederlands. De tekst bevat essentiële informatie over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België. De tekst is slordig geschreven en bevat afkortingen, cryptische omschrijvingen en soms halve zinnen.
+
+Doel: knip het bericht op in losse stukken informatie per locatie en datum.
+
+Regels:
+
+1) Tekstbehoud
+- De inhoud van elk los stuk blijft EXACT zoals in de bron (inclusief hashtags, haakjes, interpunctie). Verander niets en maak geen interpretaties.
+- Alleen spaties aan het begin/einde van "informatie" mogen worden getrimd.
+- Normaliseren is uitsluitend toegestaan voor LOCATIENAMEN (zie regel 2).
+
+2) Normaliseren van locaties
+- Normaliseer varianten en schrijfwijzen van locaties naar standaardnamen. Voorbeelden:
+  - "HvH", "hvh", "hoek vh" → "Hoek van Holland"
+  - "Schev", "schev n", "scheveningen noord" → "Scheveningen"
+  - "wijk", "wijk aan" → "Wijk aan Zee"
+  - "zvoort" → "Zandvoort"
+  - "Z-H" of "ZH" → "Zuid-Holland"
+  - "BE" → "België"
+
+3) Toegestane locaties (en alleen deze)
+[Nederland, Nederland&België, Zeeland, Domburg, Cadzand, Zuid-Holland, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Noord-Holland, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Wadden, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog, België, De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist]
+
+4) Locatie-koppeling
+- Als een los stuk 1 locatie aanduidt → koppel aan die ene locatie (na normalisatie) uit de lijst van regel 3.
+- Als een los stuk meerdere locaties aanduidt (bv. “Texel en De Koog”) → maak voor elke corresponderende locatie een afzonderlijk record met dezelfde "informatie".
+- Als er GEEN locatie wordt genoemd → gebruik "Nederland&België" als locatie.
+
+5) Volledige dekking
+- Het volledige bericht moet terugkomen in de output: laat geen uitspraken achterwege. Indien een zin meerdere onafhankelijke informatie-eenheden bevat (bv. verschillende tijden of waarschuwingen), splits deze dan in meerdere records (met dezelfde locatie(s) waar van toepassing).
+
+6) Datum en dag
+- Als expliciete kalenderdatum genoemd is → gebruik die datum (ISO: YYYY-MM-DD).
+- Als alleen een weekdag genoemd is → gebruik de eerstvolgende kalenderdatum met die dag, relatief t.o.v. vandaag (uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
+- Noteer de (Nederlandse) dagnaam in "dag" exact zoals genoemd (bv. "maandag"). Als de dag indirect is (afgeleid uit de gekozen datum), vul dan de juiste Nederlandse dagnaam in.
+- Als geen dag/datum te bepalen is → zet "dag" = null en "datum" = null.
+
+7) Dagdeel
+- Als er een tijdstip is genoemd, map naar:
+  - "ochtend" (06:00–11:59), "middag" (12:00–17:59), "avond" (18:00–23:59).
+- Als alleen een dag is genoemd zonder tijd → gebruik "hele dag".
+- Als meerdere tijden/dagdelen in één stuk voorkomen → splits in aparte records.
+- Als geen dagdeel te herleiden is → "dagdeel" = null.
+
+8) Output
+- Geef één JSON-object terug met locaties als keys (alleen waarden uit regel 3).
+- De value per locatie is een array van records. Voor elk record gebruik je exact deze structuur en sleutelvolgorde:
+
+{
+  "<locatie>": [
+    {
+      "dag": "<nl-dagnaam of null>",
+      "datum": "YYYY-MM-DD of null",
+      "dagdeel": "ochtend|middag|avond|hele dag|null",
+      "informatie": "<exact tekstfragment uit bron>"
+    }
+  ]
+}
+
+Invoer:
+<<<{text}>>>
+"""
+
+PROMPT2_TEMPLATE = """Doel:
+Neem de JSON-output van stap 1 (met locaties en regio’s) en produceer één JSON-object waarin alleen plaatsnamen als keys voorkomen. Alle informatie die indirect via regio’s/provincies/“Nederland&België” is genoemd, moet worden toegeschreven aan de bijbehorende plaatsnamen.
+
+Input:
+<<<{step1_output}>>>
+
+Toegestane plaatsnamen (en alleen deze als keys in de output):
+[Domburg, Cadzand, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog, De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist]
+
+Regio → plaatsnaam mapping:
+- Zeeland → Domburg, Cadzand
+- Zuid-Holland (of Z-H) → Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid
+- Noord-Holland (of N-H) → Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort
+- Wadden → Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
+- Nederland → Domburg, Cadzand, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
+- België → De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist
+- Nederland&België → alle bovenstaande 27 plaatsnamen
+
+Belangrijke regels:
+- Geen tekstwijziging: de velden dag, datum, dagdeel, en vooral informatie worden niet aangepast. Kopieer ze 1-op-1. Geen herformulering, vertaling, interpretatie of normalisatie buiten locatie-distributie.
+- Distributie: voor elke key in data
+  - Als het al een plaatsnaam is (uit de lijst hierboven): kopieer alle records naar dezelfde plaatskey in de output.
+  - Als het een regio/provincie/verenigde key is (zoals Zeeland, Zuid-Holland, Noord-Holland, Wadden, België, Nederland, Nederland&België): dupliceer elk record naar alle bijbehorende plaatsnamen volgens de mapping hierboven.
+- Samenvoegen: de output per plaatsnaam bevat alle records die rechtstreeks aan die plaats waren gekoppeld plus alle gedistribueerde records vanuit regio’s/verenigde keys.
+- Deduplicatie: verwijder exacte duplicaten binnen een plaatsnaam (een duplicaat is een record met exact gelijke waarden voor dag, datum, dagdeel, informatie).
+- Volledigheid: alle 27 plaatsnamen moeten altijd als key aanwezig zijn in de output. Als er geen records voor een plaatsnaam zijn, gebruik dan een lege array [].
+- Volgorde (optioneel maar gewenst): sorteer per plaatsnaam de records primair op datum (oplopend; null laatst), secundair op dagdeel met volgorde ochtend < middag < avond < hele dag < null.
+
+Outputformaat: geef uitsluitend één JSON-object terug met precies de 27 plaatsnaamkeys, en per key een array van objecten met exact de velden (en sleutelvolgorde):
+{
+  "<plaatsnaam>": [
+    {
+      "dag": "<string of null>",
+      "datum": "<YYYY-MM-DD of null>",
+      "dagdeel": "<ochtend|middag|avond|hele dag|null>",
+      "informatie": "<exacte ongewijzigde tekst>"
+    }
+  ],
+  ...
+}
+"""
+
+PROMPT3_TEMPLATE = """Doel: Neem de input die onderaan vermeldt staat en produceer één JSON-object. Bundel per plaatsnaam + datum + dagdeel alle records tot maximaal één entry per dagdeel (ochtend, middag, avond, hele dag). De inhoud van "informatie" blijft exact zoals in de input; er worden geen woorden gewijzigd of toegevoegd, behalve een vaste scheiding tussen samengevoegde fragmenten.
+
+Regels:
+- Scope & behoud
+    - Werk per plaatsnaam (top-level key).
+    - Binnen een plaatsnaam werk je per datum (YYYY-MM-DD of null).
+    - Binnen een datum bundel je per dagdeel tot maximaal één record voor elk van: "ochtend", "middag", "avond", "hele dag".
+    - De tekst in "informatie" blijft exact; niet herschrijven of interpreteren.
+- Samenvoegen "informatie"
+    - Verzamel alle records met dezelfde (plaatsnaam, datum, dagdeel).
+    - Behoud de volgorde van de fragmenten zoals ze in de input-array voorkomen.
+    - Plak alle "informatie"-fragmenten achter elkaar met exact deze scheiding tussen fragmenten: "\n" (één newline-karakter).
+    - Verwijder exacte duplicaten van fragmenten binnen dezelfde combinatie (stringvergelijking 1-op-1).
+- Waarden voor "dag"
+    - Als binnen (plaats, datum, dagdeel) alle "dag" waarden gelijk zijn → gebruik die waarde.
+    - Anders kies de meest frequente niet-null waarde. Bij gelijke frequentie: kies de eerstvoorkomende niet-null in inputvolgorde.
+    - Als alle "dag" null zijn maar "datum" niet-null is → bepaal de Nederlandse dagnaam uit de datum (Europe/Amsterdam).
+    - Als "datum" ook null is → "dag" = null.
+- Waarden voor "dagdeel"
+    - Gebruik exact één van: "ochtend", "middag", "avond", "hele dag".
+    - Maak nooit extra varianten aan.
+- Outputstructuur per plaatsnaam
+    - De value is een array met records. Per record exact deze sleutels en volgorde: { "dag": "<string of null>", "datum": "<YYYY-MM-DD of null>", "dagdeel": "<ochtend|middag|avond|hele dag>", "informatie": "<samengevoegde tekst, fragmenten gescheiden door één newline-karakter>" }
+    - Per (plaatsnaam, datum) mogen maximaal 4 records bestaan (één per dagdeel dat voorkomt). Dagdelen die niet voorkomen laat je weg.
+    - Sorteer binnen elke plaatsnaam: primair op "datum" oplopend (null laatst), secundair op dagdeel met volgorde: ochtend < middag < avond < hele dag.
+
+Output:
+Geef uitsluitend één JSON-object terug met plaatsnamen als keys en per key een array van records volgens de structuur in regel 5.
+
+Input:
+<<<[tekst]>>>
+"""
+
+PROMPT4_TEMPLATE = """Doel
+Neem de input (onderaan) en produceer één JSON-object in de exacte structuur zoals hieronder gedefinieerd. Zet de bestaande records om naar een genormaliseerd schema met "alert" en parameters. Er mag geen enkele interpretatie of toevoeging plaatsvinden buiten de regels hieronder.
+
+Regels
+
+1) Scope
+- Input is een JSON-object met plaatsnamen als keys. Elke plaatsnaam bevat een array van records met sleutels "dag", "datum", "dagdeel", "informatie".
+- Output moet een JSON-object zijn met dezelfde plaatsnamen (alle 27 locaties, zie lijst hieronder). Voor locaties die in de input ontbreken → geef een array met één default record (zie regel 6).
+
+2) Alerts
+- Zoek in elk "informatie"-veld naar expliciete waarschuwingen.
+- Als er een van deze woorden/uitdrukkingen voorkomt (hoofdletterongevoelig): ["gevaarlijk", "geen beginners", "niet te doen", "stroomt hard", "af te raden"] → zet `"alert": true`.
+- Anders altijd `"alert": false`.
+
+3) Parameters
+Uit elk "informatie"-veld haal je, exact en zonder interpretatie, de volgende parameters. Als iets niet letterlijk aanwezig of ondubbelzinnig is → null.
+- `swell_m`: als hoogte in cm → omrekenen naar meter (50cm → 0.5). Als range (bijv. "40-60cm") → gemiddelde, afgerond op 1 decimaal (50cm → 0.5). In meters ("1-1.5m") idem. Vage termen ("klein", "flat") → null.
+- `wave_height`: exacte omschrijving van golf hoogte uit tekst ("1-1,5m", "flat", "weinig", "heuphoog"). Geen data → null.
+- `period_s`: periode, numeriek in seconden. Bij range → gemiddelde, afgerond op geheel getal. Geen data → null.
+- `wind_bft`: integer uit tekst ("3 bft"). Geen data → null.
+- `wind_kmh`: alleen als letterlijk vermeld. Geen data → null.
+- `wind_dir`: windrichting uit tekst mappen naar officiële lijst: [N, NNO, NO, ONO, O, OZO, ZO, ZZO, Z, ZZW, ZW, WZW, W, WNW, NW, NNW]. Altijd UPPERCASE. Geen data → null.
+- `tide`: exacte term uit tekst over getij ("laag", "opkomend tij", "mid-tij"). Geen data → null.
+- `tide_score`: alleen een van ["slecht", "medium", "goed"]. Mapping: als de tekst een kwalificatie geeft ("pas goed na 9u" → "goed"). Geen data → null.
+- `clean`: "ja", "nee", of null. Voorbeeld: "clean kansen" → "ja", "niet zeker clean" → "nee". Geen data → null.
+- `go_advanced`: exacte tekstfragmenten met adviezen voor ervaren surfers. Als meerdere → combineer met "\n". Geen data → null.
+- `go_beginner`: exacte tekstfragmenten met adviezen voor beginnende surfers. Als meerdere → combineer met "\n". Geen data → null.
+
+4) Dagdelen
+- Elk record moet in "parts" verdeeld worden naar vier dagdelen: "ochtend", "middag", "avond", "hele dag".
+- Voor dagdelen zonder data → alle parameters = null.
+
+5) Outputstructuur
+Per locatie is de value een array van dagrecords. Elk dagrecord:
+{
+  "date": "YYYY-MM-DD" of null,
+  "alert": <boolean>,
+  "parts": {
+    "ochtend": { "swell_m": <number or null>, "wave_height": "<string or null>", "period_s": <number or null>, "wind_bft": <integer or null>, "wind_kmh": <integer or null>, "wind_dir": "<string or null>", "tide": "<string or null>", "tide_score": "<string or null>", "clean": "<string or null>", "go_beginner": "<string or null>", "go_advanced": "<string or null>" },
+    "middag": { ...zelfde structuur... },
+    "avond": { ...zelfde structuur... },
+    "hele dag": { ...zelfde structuur... }
+  }
+}
+
+6) Compleetheid
+- Alle 27 locaties moeten als key aanwezig zijn (lowercase). Voor locaties die niet in de input zaten → array met één record:
+  {
+    "date": null,
+    "alert": false,
+    "parts": {
+      "ochtend": {...alle velden null...}, 
+      "middag": {...alle velden null...}, 
+      "avond": {...alle velden null...},
+      "hele dag": {...alle velden null...} 
+    }
+  }
+
+Output
+Geef uitsluitend het JSON-object terug in exact deze structuur en sleutelvolgorde. Geen tekst erbuiten.
+
+Locatielijst (27)
+["texel", "vlieland", "terschelling", "ameland", "schiermonnikoog", "wijk aan zee", "ijmuiden", "egmond", "bergen", "petten", "zandvoort", "noordwijk", "katwijk", "wassenaar", "scheveningen", "ter heijde", "zandmotor zuid", "hoek van holland", "kijkduin", "ouddorp", "maasvlakte", "domburg", "cadzand", "de panne", "middelkerke", "oostende", "zeebrugge", "knokke-heist"]
+
+Input:
+<<<{data}>>>
+"""
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -21,85 +227,56 @@ def _extract_json_object(text: str) -> str:
     return s[start:end+1]
 
 def groq_process_text(text):
-    # BELANGRIJK: alle letterlijke accolades in het voorbeeld hieronder zijn gedubbeld {{ }}
-    
-    prompt="""Je krijgt hieronder een informeel surfweerbericht in het Nederlands. De tekst bevat essentiële informatie over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België. De tekst is echter slordig geschreven en bevat afkortingen, cryptische omschrijvingen en soms halve zinnen.
-    
-    Doel: zet deze informatie om naar één gestructureerd JSON-object volgens de regels hieronder.
-    
-    1. **Normalisatie & hiërarchie**  
-       - Normaliseer varianten en schrijfwijzen naar de juiste plaatsnaam. Bijvoorbeeld:
-        - “HvH”, “hvh”, “hoek vh” → “Hoek van Holland”
-        - “Schev”, “schev n”, “scheveningen noord” → “Scheveningen”
-        - “wijk”, “wijk aan” → “Wijk aan Zee”
-        - “zvoort” → “Zandvoort”
-       - Hiërarchie:  koppel uitspraken over locaties op het niveau van landen, provincies, en regio's aan de corresponderende plaatsnamen:
-        - Zeeland → Domburg, Cadzand
-        - Zuid-Holland of Z-H → Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid
-        - Noord-Holland of N-H → Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort
-        - Wadden → Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
-        - België of BE → De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist
-       - Algemene uitspraken waar geen locatie wordt genoemd, gelden voor alle locaties, tenzij een specifieke uitspraak deze overschrijft.
-    
-    2. **Locaties**  
-        Gebruik uitsluitend en exact deze lijst als keys (lowercase, spaties behouden): domburg, cadzand, hoek van holland, kijkduin, ter heijde, scheveningen, katwijk, wassenaar, ouddorp, maasvlakte, zandmotor zuid, wijk aan zee, ijmuiden, egmond, bergen, petten, noordwijk, zandvoort, texel, vlieland, terschelling, ameland, schiermonnikoog, de panne, middelkerke, oostende, zeebrugge, knokke-heist.
-        → Alle 27 moeten in de output voorkomen. Als er geen info over een locatie is: array met één object waarin date=null, alert=false, en elke waarde binnen parts = null.
-    
-    3. **Datum**  
-        - Als expliciete datum genoemd is → gebruik die.  
-        - Als alleen weekdag genoemd is → pak de eerstvolgende kalenderdatum met die dag, relatief ten opzichte van vandaag (op uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
-        - Notatie: ISO (YYYY-MM-DD).
-    
-    4. **Alert**
-        Alert: true bij expliciete waarschuwingen ("gevaarlijk", "geen beginners", "niet te doen", "stroomt hard", "af te raden"). Als er geen info is → alert=false.
-    
-    5. **Dagdelen & tijden**
-        Gebruik exact: morning (06:00–11:59), midday (12:00–17:59), evening (18:00–23:59).
-        - Als alleen dag genoemd is → geldt voor alle dagdelen.  
-        - Als tijd genoemd is → map naar bijbehorend dagdeel.
-        - Meerdere tijden/dagdelen → splits in aparte records.
-    
-    6. **Parameters**
-        De belangrijkste regel is dat er nergens interpretaties gemaakt mogen worden. Gebruik exact deze parameters:
-        - swell_m: converteer cm naar meter (50cm → 0.5). Bij ranges neem gemiddelde en rond af op 1 decimaal.  Bij vage termen ("klein", "flat"), of geen data → null. 
-        - period_s: parse numeriek in seconden; bij range → gemiddelde, afronden op geheel getal. Geen data → null.
-        - wind_bft: integer uit tekst. Geen data → null.
-        - wind_kmh: Geen data → null.
-        - wind_dir: windrichting uit tekst vertalen naar een officiële windrichting uit de lijst: [N, NNO, NO, ONO, O, OZO, ZO, ZZO, Z, ZZW, ZW, WZW, W, WNW, NW, NNW]. Altijd converteren naar UPPERCASE (bijv. "z", "zzo", "wzw" → "Z", "ZZO", "WZW"). Geen data → null.
-        - tide: exacte term zoals in de tekst. Geen data → null.
-        - tide_score: alleen één van deze waarden: "slecht", "medium", "goed". Mapping: bv. "pas goed na 9u" → "goed". Geen data → null.
-        - wave_height: exact zoals vermeld in de tekst (bijv. "1-1,5m", "flat", "weinig", "heuphoogte"). Geen data → null. 
-        - clean: "ja", "nee", of `null`. Voorbeelden: "clean kansen" → "ja", "niet zeker clean" → "nee". Geen data → null.
-        - go_advanced: exacte tekstfragmenten die advies bevatten voor ervaren surfers. Indien meerdere, combineer als string of array. Geen data → null.
-        - go_beginner: exacte tekstfragmenten die advies bevatten voor beginners. Indien meerdere, combineer als string of array. Geen data → null.
-    
-    7. **Outputstructuur**  
-       Waarde = JSON-object met locaties als keys. De value per locatie is een array van dag-objecten. Alle 27 locaties uit de lijst in punt 2 moeten altijd aanwezig zijn als key in het JSON-object, ook als er geen informatie voor die locatie in de tekst staat. In dat geval moet de value een array zijn met één object waarin "date"=null, "alert"=false, en alle velden binnen "parts"=null. Gebruik exact deze structuur, benaming, en key-volgorde: 
-       {{
-          "<locatie in lowercase>": [
-            {{
-              "date": "YYYY-MM-DD",
-              "alert": <boolean>,
-              "parts": {{
-                "morning": {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }}, 
-                "midday": {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }},
-                "evening": {{ "swell_m": <number>, "period_s": <number>, "wind_bft": <integer>, "wind_kmh": <integer>, "wind_dir": "<string>", "tide": "<string>", "tide_score": "<string>", "clean": "<string>", "wave_height": "<string>", "go_beginner": "<string>", "go_advanced": "<string>" }}
-              }}
-            }}
-          ]
-        }}
-    
-    Invoer: 
-    <<<{text}>>>
-    """.format(text=text)
+    """Doorloopt het vierstaps Groq-proces met de vaste prompts en geeft het finale JSON-resultaat terug."""
 
-    chat_completion = client.chat.completions.create(
-        messages=[{"role": "user", "content": prompt}],
+    messages = []
+
+    # Stap 1: originele tekst analyseren per locatie en datum
+    step1_prompt = PROMPT1_TEMPLATE.replace("{text}", text).strip()
+    messages.append({"role": "user", "content": step1_prompt})
+    step1_resp = client.chat.completions.create(
+        messages=messages,
         model="llama-3.3-70b-versatile",
         stream=False,
-        response_format={"type": "json_object"},
         temperature=0.2,
     )
-    content = chat_completion.choices[0].message.content
-    raw = _extract_json_object(content)
+    step1_answer = step1_resp.choices[0].message.content
+
+    # Stap 2: regio’s naar plaatsen herverdelen op basis van stap 1
+    step2_prompt = PROMPT2_TEMPLATE.replace("{step1_output}", step1_answer).strip()
+    messages.append({"role": "assistant", "content": step1_answer})
+    messages.append({"role": "user", "content": step2_prompt})
+    step2_resp = client.chat.completions.create(
+        messages=messages,
+        model="llama-3.3-70b-versatile",
+        stream=False,
+        temperature=0.2,
+    )
+    step2_answer = step2_resp.choices[0].message.content
+
+    # Stap 3: records per dagdeel bundelen volgens prompt 3
+    step3_prompt = PROMPT3_TEMPLATE.replace("[tekst]", step2_answer).strip()
+    messages.append({"role": "assistant", "content": step2_answer})
+    messages.append({"role": "user", "content": step3_prompt})
+    step3_resp = client.chat.completions.create(
+        messages=messages,
+        model="llama-3.3-70b-versatile",
+        stream=False,
+        temperature=0.2,
+        response_format={"type": "json_object"},
+    )
+    step3_answer = step3_resp.choices[0].message.content
+
+    # Stap 4: records naar alert/parameterstructuur normaliseren volgens prompt 4
+    step4_prompt = PROMPT4_TEMPLATE.replace("{data}", step3_answer).strip()
+    messages.append({"role": "assistant", "content": step3_answer})
+    messages.append({"role": "user", "content": step4_prompt})
+    final_resp = client.chat.completions.create(
+        messages=messages,
+        model="llama-3.3-70b-versatile",
+        stream=False,
+        temperature=0.2,
+        response_format={"type": "json_object"},
+    )
+    raw = _extract_json_object(final_resp.choices[0].message.content)
     return json.loads(raw)

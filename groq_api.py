@@ -263,7 +263,7 @@ def _run(template: str, payload: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
 # ------------------------
 # Orchestratie (type-veilig)
 # ------------------------
-def groq_process_text(text: str, *, return_intermediate: bool = False):
+def groq_process_text(text: str, *, return_intermediate: bool = True):
     """
     Stap 1: input = vrije tekst (str)
     Stap 2: input = JSON (dict)    <- output Stap 1

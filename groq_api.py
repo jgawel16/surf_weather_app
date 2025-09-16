@@ -2,6 +2,7 @@
 import os
 import re
 import json
+from typing import Any, Dict, Tuple, Optional, Union
 from groq import Groq
 
 PROMPT1_TEMPLATE = """Je krijgt hieronder een informeel surfweerbericht in het Nederlands. De tekst bevat essentiële informatie over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België. De tekst is slordig geschreven en bevat afkortingen, cryptische omschrijvingen en soms halve zinnen.
@@ -41,11 +42,6 @@ Regels:
 - Noteer de datum als ISO: YYYY-MM-DD.
 - Als geen datum te bepalen is → zet "datum" = null.
 
-6) Dag
-- Als expliciete datum genoemd is → gebruik die datum om "dag" te bepalen.
-- Als alleen een weekdag genoemd is → gebruik die dag.
-- Als geen dag te bepalen is → zet "datum" = null.
-
 7) Dagdeel
 - Als er een tijdstip is genoemd, map naar:
   - "ochtend" (06:00–11:59), "middag" (12:00–17:59), "avond" (18:00–23:59).
@@ -60,7 +56,6 @@ Regels:
 {
   "<locatie>": [
     {
-      "dag": "<nl-dagnaam of null>",
       "datum": "YYYY-MM-DD of null",
       "dagdeel": "ochtend|middag|avond|hele dag|null",
       "informatie": "<exact tekstfragment uit bron>"
@@ -69,14 +64,11 @@ Regels:
 }
 
 Invoer:
-<<<{text}>>>
+<<<{payload}>>>
 """
 
 PROMPT2_TEMPLATE = """Doel:
 Neem de JSON-output van stap 1 (met locaties en regio’s) en produceer één JSON-object waarin alleen plaatsnamen als keys voorkomen. Alle informatie die indirect via regio’s/provincies/“Nederland&België” is genoemd, moet worden toegeschreven aan de bijbehorende plaatsnamen.
-
-Input:
-<<<{step1_output}>>>
 
 Toegestane plaatsnamen (en alleen deze als keys in de output):
 [Domburg, Cadzand, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog, De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist]
@@ -104,7 +96,6 @@ Outputformaat: geef uitsluitend één JSON-object terug met precies de 27 plaats
 {
   "<plaatsnaam>": [
     {
-      "dag": "<string of null>",
       "datum": "<YYYY-MM-DD of null>",
       "dagdeel": "<ochtend|middag|avond|hele dag|null>",
       "informatie": "<exacte ongewijzigde tekst>"
@@ -112,6 +103,9 @@ Outputformaat: geef uitsluitend één JSON-object terug met precies de 27 plaats
   ],
   ...
 }
+
+Input:
+<<<{payload}>>>
 """
 
 PROMPT3_TEMPLATE = """Doel: Neem de input die onderaan vermeldt staat en produceer één JSON-object. Bundel per plaatsnaam + datum + dagdeel alle records tot maximaal één entry per dagdeel (ochtend, middag, avond, hele dag). De inhoud van "informatie" blijft exact zoals in de input; er worden geen woorden gewijzigd of toegevoegd, behalve een vaste scheiding tussen samengevoegde fragmenten.
@@ -144,7 +138,7 @@ Output:
 Geef uitsluitend één JSON-object terug met plaatsnamen als keys en per key een array van records volgens de structuur in regel 5.
 
 Input:
-<<<[tekst]>>>
+<<<{payload}>>>
 """
 
 PROMPT4_TEMPLATE = """Doel
@@ -212,16 +206,25 @@ Locatielijst (27)
 ["texel", "vlieland", "terschelling", "ameland", "schiermonnikoog", "wijk aan zee", "ijmuiden", "egmond", "bergen", "petten", "zandvoort", "noordwijk", "katwijk", "wassenaar", "scheveningen", "ter heijde", "zandmotor zuid", "hoek van holland", "kijkduin", "ouddorp", "maasvlakte", "domburg", "cadzand", "de panne", "middelkerke", "oostende", "zeebrugge", "knokke-heist"]
 
 Input:
-<<<{data}>>>
+<<<{payload}>>>
 """
 
+# ------------------------
+# Client
+# ------------------------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
+# ------------------------
+# Helpers
+# ------------------------
+_SYSTEM_JSON_ONLY = (
+    "Je bent een strikte JSON-transformatie-engine. "
+    "Antwoord ALLEEN met één geldig JSON-object. "
+    "Geen uitleg, geen backticks, geen extra tekst."
+)
+
 def _extract_json_object(text: str) -> str:
-    """
-    Verwijdert eventuele ```json ... ``` fences en knipt substring van eerste '{' tot laatste '}'.
-    """
     s = text.strip()
     if s.startswith("```"):
         s = re.sub(r"^```(?:json)?\s*|\s*```$", "", s, flags=re.IGNORECASE | re.DOTALL).strip()
@@ -229,62 +232,57 @@ def _extract_json_object(text: str) -> str:
     end = s.rfind("}")
     if start == -1 or end == -1 or end <= start:
         raise ValueError("Kon geen JSON-object vinden in modeloutput.")
-    return s[start:end+1]
+    return s[start:end + 1]
 
-def groq_process_text(text):
-    """Doorloopt het vierstaps Groq-proces met de vaste prompts en geeft het finale JSON-resultaat terug."""
+def _ensure_json_obj(obj: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
+    if isinstance(obj, dict):
+        return obj
+    return json.loads(obj)
 
-    messages = []
+def _render_prompt(template: str, payload: Union[str, Dict[str, Any]]) -> str:
+    if isinstance(payload, dict):
+        payload_str = json.dumps(payload, ensure_ascii=False)
+    else:
+        payload_str = str(payload)
+    return template.format(payload=payload_str)
 
-    # Stap 1: originele tekst analyseren per locatie en datum
-    step1_prompt = PROMPT1_TEMPLATE.replace("{text}", text).strip()
-    messages.append({"role": "user", "content": step1_prompt})
-    step1_resp = client.chat.completions.create(
-        messages=messages,
+def _run(template: str, payload: Union[str, Dict[str, Any]]) -> Dict[str, Any]:
+    prompt = _render_prompt(template, payload)
+    resp = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
-        stream=False,
         temperature=0.2,
         response_format={"type": "json_object"},
-)
-    step1_answer = step1_resp.choices[0].message.content
-
-    # Stap 2: regio’s naar plaatsen herverdelen op basis van stap 1
-    step2_prompt = PROMPT2_TEMPLATE.replace("{step1_output}", step1_answer).strip()
-    messages.append({"role": "assistant", "content": step1_answer})
-    messages.append({"role": "user", "content": step2_prompt})
-    step2_resp = client.chat.completions.create(
-        messages=messages,
-        model="llama-3.3-70b-versatile",
-        stream=False,
-        temperature=0.2,
-        response_format={"type": "json_object"},
-
+        messages=[
+            {"role": "system", "content": _SYSTEM_JSON_ONLY},
+            {"role": "user", "content": prompt},
+        ],
     )
-    step2_answer = step2_resp.choices[0].message.content
+    raw = resp.choices[0].message.content
+    return json.loads(_extract_json_object(raw))
 
-    # Stap 3: records per dagdeel bundelen volgens prompt 3
-    step3_prompt = PROMPT3_TEMPLATE.replace("[tekst]", step2_answer).strip()
-    messages.append({"role": "assistant", "content": step2_answer})
-    messages.append({"role": "user", "content": step3_prompt})
-    step3_resp = client.chat.completions.create(
-        messages=messages,
-        model="llama-3.3-70b-versatile",
-        stream=False,
-        temperature=0.2,
-        response_format={"type": "json_object"},
-    )
-    step3_answer = step3_resp.choices[0].message.content
+# ------------------------
+# Orchestratie (type-veilig)
+# ------------------------
+def groq_process_text(text: str, *, return_intermediate: bool = False):
+    """
+    Stap 1: input = vrije tekst (str)
+    Stap 2: input = JSON (dict)    <- output Stap 1
+    Stap 3: input = JSON (dict)    <- output Stap 2
+    Stap 4: input = JSON (dict)    <- output Stap 3
+    """
+    if not isinstance(text, str):
+        raise TypeError("Stap 1 verwacht een str als input.")
 
-    # Stap 4: records naar alert/parameterstructuur normaliseren volgens prompt 4
-    step4_prompt = PROMPT4_TEMPLATE.replace("{data}", step3_answer).strip()
-    messages.append({"role": "assistant", "content": step3_answer})
-    messages.append({"role": "user", "content": step4_prompt})
-    final_resp = client.chat.completions.create(
-        messages=messages,
-        model="llama-3.3-70b-versatile",
-        stream=False,
-        temperature=0.2,
-        response_format={"type": "json_object"},
-    )
-    raw = _extract_json_object(final_resp.choices[0].message.content)
-    return json.loads(raw)
+    # 1) tekst -> locaties/regio's (JSON)
+    step1 = _run(PROMPT1_TEMPLATE, text)              # text in {payload}
+
+    # 2) regio's -> plaatsnamen (JSON)
+    step2 = _run(PROMPT2_TEMPLATE, _ensure_json_obj(step1))
+
+    # 3) bundelen per (plaats, datum, dagdeel) (JSON)
+    step3 = _run(PROMPT3_TEMPLATE, _ensure_json_obj(step2))
+
+    # 4) normaliseren naar schema met alert/parameters (JSON)
+    step4 = _run(PROMPT4_TEMPLATE, _ensure_json_obj(step3))
+
+    return (step1, step2, step3, step4) if return_intermediate else step4

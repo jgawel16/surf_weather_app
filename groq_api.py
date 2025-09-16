@@ -35,11 +35,16 @@ Regels:
 5) Volledige dekking
 - Het volledige bericht moet terugkomen in de output: laat geen uitspraken achterwege. Indien een zin meerdere onafhankelijke informatie-eenheden bevat (bv. verschillende tijden of waarschuwingen), splits deze dan in meerdere records (met dezelfde locatie(s) waar van toepassing).
 
-6) Datum en dag
-- Als expliciete kalenderdatum genoemd is → gebruik die datum (ISO: YYYY-MM-DD).
-- Als alleen een weekdag genoemd is → gebruik de eerstvolgende kalenderdatum met die dag, relatief t.o.v. vandaag (uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
-- Noteer de (Nederlandse) dagnaam in "dag" exact zoals genoemd (bv. "maandag"). Als de dag indirect is (afgeleid uit de gekozen datum), vul dan de juiste Nederlandse dagnaam in.
-- Als geen dag/datum te bepalen is → zet "dag" = null en "datum" = null.
+6) Datum
+- Als expliciete kalenderdatum genoemd is → gebruik die datum 
+- Als alleen een weekdag genoemd is → gebruik de eerstvolgende kalenderdatum met die dag als datum, relatief t.o.v. vandaag (uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
+- Noteer de datum als ISO: YYYY-MM-DD.
+- Als geen datum te bepalen is → zet "datum" = null.
+
+6) Dag
+- Als expliciete datum genoemd is → gebruik die datum om "dag" te bepalen.
+- Als alleen een weekdag genoemd is → gebruik die dag.
+- Als geen dag te bepalen is → zet "datum" = null.
 
 7) Dagdeel
 - Als er een tijdstip is genoemd, map naar:

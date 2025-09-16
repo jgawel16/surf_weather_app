@@ -1,0 +1,1666 @@
+{
+    "Domburg": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Verder Domburg, nogo, te hoogwater en geen swell en BE dus ook niet."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Cadzand": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Hoek van Holland": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Kijkduin": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Ter Heijde": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Schev en alle spots zuidelijker (meest pakt nog Zandmotor zuid op bij Monster = het oude terheijde qua Pier-hoek refractie door de Mv2 verlegging), maar wel alleen rond mid-tij en dat is om 7u al."
+        }
+    ],
+    "Scheveningen": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Schev en alle spots zuidelijker (meest pakt nog Zandmotor zuid op bij Monster = het oude terheijde qua Pier-hoek refractie door de Mv2 verlegging), maar wel alleen rond mid-tij en dat is om 7u al."
+        }
+    ],
+    "Katwijk": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Zelfde voor Nwijk, Ktwijk en Wasnr (echter hoe zuidelijker hoe minder fishable het wordt en je eerder een longboard pakt)."
+        }
+    ],
+    "Wassenaar": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Zelfde voor Nwijk, Ktwijk en Wasnr (echter hoe zuidelijker hoe minder fishable het wordt en je eerder een longboard pakt)."
+        }
+    ],
+    "Ouddorp": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Maasvlakte": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "De Mv2 zelf is niet echt een go ivm de harde stroom tussen P5-P6."
+        }
+    ],
+    "Zandmotor zuid": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Schev en alle spots zuidelijker (meest pakt nog Zandmotor zuid op bij Monster = het oude terheijde qua Pier-hoek refractie door de Mv2 verlegging), maar wel alleen rond mid-tij en dat is om 7u al."
+        }
+    ],
+    "Wijk aan Zee": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel flat bij de pier (wijk), stuk vandaag longboard lijntjes met ZW wind 8-10u, daarna gaat de schwung er uit en wordt het slapper maar blijft surfable wel tot 12u met fish"
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "middag",
+            "informatie": "en daarna met long nog tot 15u het wel erg klein wordt."
+        }
+    ],
+    "IJmuiden": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "middag",
+            "informatie": "Misschien daarna nog op IJmuiden mogelijk maar swell uit zuid houdt het in de regel niet lang uit."
+        }
+    ],
+    "Egmond": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Bergen": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Petten": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Noordwijk": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Zelfde voor Nwijk, Ktwijk en Wasnr (echter hoe zuidelijker hoe minder fishable het wordt en je eerder een longboard pakt)."
+        }
+    ],
+    "Zandvoort": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Verder bij Zandvoort uit nice surfje te doen 10-13u of als de wind eerder al minder wordt, want staat wel stroming nog rond opkomend tij 8-10u."
+        }
+    ],
+    "Texel": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "heuphoog te fishen kan leuk gaan op De koog de hele ochtend"
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "middag",
+            "informatie": "en ook nog tot 15u iets van surf."
+        }
+    ],
+    "Vlieland": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Terschelling": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Ameland": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Schiermonnikoog": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "De Panne": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Middelkerke": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Oostende": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de kust van BE dus ook niet."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Zeebrugge": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ],
+    "Knokke-Heist": [
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wind lijkt voldoende hard vannacht voor een golfje op zondag-ochtend langs de vooral hollandse kust, echter de wind draait naar sideshore ZW en maakt het niet per se de moeite waard."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "ochtend",
+            "informatie": "Wel gaat om 8u de harde wind er uit en wordt 3bft."
+        },
+        {
+            "dag": "zondag",
+            "datum": "2024-09-22",
+            "dagdeel": "hele dag",
+            "informatie": "Op de wadden nog even 5bft, maar daar al blijft het al helemaal flat (net als de kust van BE)"
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "ochtend",
+            "informatie": "Weer wat meer wind, maar ochtend nog helemaal flat."
+        },
+        {
+            "dag": "maandag",
+            "datum": "2024-09-23",
+            "dagdeel": "middag",
+            "informatie": "Komt pas einde middag of avond wat op gang, dus inzichten daarover komen maandag wel."
+        },
+        {
+            "dag": "dinsdag",
+            "datum": "2024-09-24",
+            "dagdeel": "hele dag",
+            "informatie": "Weer minder wind en dus wat minder surf, zoals het er nu naar uitziet."
+        },
+        {
+            "dag": "woensdag",
+            "datum": "2024-09-25",
+            "dagdeel": "ochtend",
+            "informatie": "Kortdurend zuidwestertje later op de ochtend en mogelijk in de middag of einde middag weer wat fun!"
+        },
+        {
+            "dag": "donderdag",
+            "datum": "2024-09-26",
+            "dagdeel": "middag",
+            "informatie": "Langer wind uit pal zuid. Dat heeft wat tijd nodig, maar breekt dan wel clean uiteindelijk (Late middag of avond)."
+        },
+        {
+            "dag": "vrijdag",
+            "datum": "2024-09-27",
+            "dagdeel": "hele dag",
+            "informatie": "West of zuidwest, dan ook eindelijk weer wat golven voor Zeeland en waarschijnlijk ook BE. Pakken wat je pakken kan dan, want volgend weekeind dreigt weer flat en zomers weertype aan te zwengelen, door de depressie uitdieping op de Oceaan bij IJsland."
+        }
+    ]
+}

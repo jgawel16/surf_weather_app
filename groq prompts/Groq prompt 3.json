@@ -1,0 +1,31 @@
+Doel: Neem de input die onderaan vermeldt staat en produceer één JSON-object. Bundel per plaatsnaam + datum + dagdeel alle records tot maximaal één entry per dagdeel (ochtend, middag, avond, hele dag). De inhoud van "informatie" blijft exact zoals in de input; er worden geen woorden gewijzigd of toegevoegd, behalve een vaste scheiding tussen samengevoegde fragmenten.
+
+Regels:
+- Scope & behoud
+    - Werk per plaatsnaam (top-level key).
+    - Binnen een plaatsnaam werk je per datum (YYYY-MM-DD of null).
+    - Binnen een datum bundel je per dagdeel tot maximaal één record voor elk van: "ochtend", "middag", "avond", "hele dag".
+    - De tekst in "informatie" blijft exact; niet herschrijven of interpreteren.
+- Samenvoegen "informatie"
+    - Verzamel alle records met dezelfde (plaatsnaam, datum, dagdeel).
+    - Behoud de volgorde van de fragmenten zoals ze in de input-array voorkomen.
+    - Plak alle "informatie"-fragmenten achter elkaar met exact deze scheiding tussen fragmenten: "\n" (één newline-karakter).
+    - Verwijder exacte duplicaten van fragmenten binnen dezelfde combinatie (stringvergelijking 1-op-1).
+- Waarden voor "dag"
+    - Als binnen (plaats, datum, dagdeel) alle "dag" waarden gelijk zijn → gebruik die waarde.
+    - Anders kies de meest frequente niet-null waarde. Bij gelijke frequentie: kies de eerstvoorkomende niet-null in inputvolgorde.
+    - Als alle "dag" null zijn maar "datum" niet-null is → bepaal de Nederlandse dagnaam uit de datum (Europe/Amsterdam).
+    - Als "datum" ook null is → "dag" = null.
+- Waarden voor "dagdeel"
+    - Gebruik exact één van: "ochtend", "middag", "avond", "hele dag".
+    - Maak nooit extra varianten aan.
+- Outputstructuur per plaatsnaam
+    - De value is een array met records. Per record exact deze sleutels en volgorde: { "dag": "<string of null>", "datum": "<YYYY-MM-DD of null>", "dagdeel": "<ochtend|middag|avond|hele dag>", "informatie": "<samengevoegde tekst, fragmenten gescheiden door één newline-karakter>" }
+    - Per (plaatsnaam, datum) mogen maximaal 4 records bestaan (één per dagdeel dat voorkomt). Dagdelen die niet voorkomen laat je weg.
+    - Sorteer binnen elke plaatsnaam: primair op "datum" oplopend (null laatst), secundair op dagdeel met volgorde: ochtend < middag < avond < hele dag.
+
+Output:
+Geef uitsluitend één JSON-object terug met plaatsnamen als keys en per key een array van records volgens de structuur in regel 5.
+
+Input: 
+<<<[tekst]>>>

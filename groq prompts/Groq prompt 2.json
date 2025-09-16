@@ -1,0 +1,40 @@
+Doel:
+Neem de JSON-output van stap 1 (met locaties en regio’s) en produceer één JSON-object waarin alleen plaatsnamen als keys voorkomen. Alle informatie die indirect via regio’s/provincies/“Nederland&België” is genoemd, moet worden toegeschreven aan de bijbehorende plaatsnamen.
+
+Input:
+De JSON-output van stap 1.
+
+Toegestane plaatsnamen (en alleen deze als keys in de output):
+[Domburg, Cadzand, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog, De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist]
+
+Regio → plaatsnaam mapping:
+- Zeeland → Domburg, Cadzand
+- Zuid-Holland (of Z-H) → Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid
+- Noord-Holland (of N-H) → Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort
+- Wadden → Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
+- Nederland → Domburg, Cadzand, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog
+- België → De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist
+- Nederland&België → alle bovenstaande 27 plaatsnamen
+
+Belangrijke regels:
+- Geen tekstwijziging: de velden dag, datum, dagdeel, en vooral informatie worden niet aangepast. Kopieer ze 1-op-1. Geen herformulering, vertaling, interpretatie of normalisatie buiten locatie-distributie.
+- Distributie: voor elke key in data
+  - Als het al een plaatsnaam is (uit de lijst hierboven): kopieer alle records naar dezelfde plaatskey in de output.
+  - Als het een regio/provincie/verenigde key is (zoals Zeeland, Zuid-Holland, Noord-Holland, Wadden, België, Nederland, Nederland&België): dupliceer elk record naar alle bijbehorende plaatsnamen volgens de mapping hierboven.
+- Samenvoegen: de output per plaatsnaam bevat alle records die rechtstreeks aan die plaats waren gekoppeld plus alle gedistribueerde records vanuit regio’s/verenigde keys.
+- Deduplicatie: verwijder exacte duplicaten binnen een plaatsnaam (een duplicaat is een record met exact gelijke waarden voor dag, datum, dagdeel, informatie).
+- Volledigheid: alle 27 plaatsnamen moeten altijd als key aanwezig zijn in de output. Als er geen records voor een plaatsnaam zijn, gebruik dan een lege array [].
+- Volgorde (optioneel maar gewenst): sorteer per plaatsnaam de records primair op datum (oplopend; null laatst), secundair op dagdeel met volgorde ochtend < middag < avond < hele dag < null.
+
+Outputformaat: geef uitsluitend één JSON-object terug met precies de 27 plaatsnaamkeys, en per key een array van objecten met exact de velden (en sleutelvolgorde):
+{
+  "<plaatsnaam>": [
+    {
+      "dag": "<string of null>",
+      "datum": "<YYYY-MM-DD of null>",
+      "dagdeel": "<ochtend|middag|avond|hele dag|null>",
+      "informatie": "<exacte ongewijzigde tekst>"
+    }
+  ],
+  ...
+}

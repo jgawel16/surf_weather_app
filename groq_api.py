@@ -53,15 +53,15 @@ Regels:
 - Geef één JSON-object terug met locaties als keys (alleen waarden uit regel 3).
 - De value per locatie is een array van records. Voor elk record gebruik je exact deze structuur en sleutelvolgorde:
 
-{
+{{
   "<locatie>": [
-    {
+    {{
       "datum": "YYYY-MM-DD of null",
       "dagdeel": "ochtend|middag|avond|hele dag|null",
       "informatie": "<exact tekstfragment uit bron>"
-    }
+    }}
   ]
-}
+}}
 
 Invoer:
 <<<{payload}>>>
@@ -83,26 +83,26 @@ Regio → plaatsnaam mapping:
 - Nederland&België → alle bovenstaande 27 plaatsnamen
 
 Belangrijke regels:
-- Geen tekstwijziging: de velden dag, datum, dagdeel, en vooral informatie worden niet aangepast. Kopieer ze 1-op-1. Geen herformulering, vertaling, interpretatie of normalisatie buiten locatie-distributie.
+- Geen tekstwijziging: de velden datum, dagdeel, en vooral informatie worden niet aangepast. Kopieer ze 1-op-1. Geen herformulering, vertaling, interpretatie of normalisatie buiten locatie-distributie.
 - Distributie: voor elke key in data
   - Als het al een plaatsnaam is (uit de lijst hierboven): kopieer alle records naar dezelfde plaatskey in de output.
   - Als het een regio/provincie/verenigde key is (zoals Zeeland, Zuid-Holland, Noord-Holland, Wadden, België, Nederland, Nederland&België): dupliceer elk record naar alle bijbehorende plaatsnamen volgens de mapping hierboven.
 - Samenvoegen: de output per plaatsnaam bevat alle records die rechtstreeks aan die plaats waren gekoppeld plus alle gedistribueerde records vanuit regio’s/verenigde keys.
-- Deduplicatie: verwijder exacte duplicaten binnen een plaatsnaam (een duplicaat is een record met exact gelijke waarden voor dag, datum, dagdeel, informatie).
+- Deduplicatie: verwijder exacte duplicaten binnen een plaatsnaam (een duplicaat is een record met exact gelijke waarden voor datum, dagdeel, informatie).
 - Volledigheid: alle 27 plaatsnamen moeten altijd als key aanwezig zijn in de output. Als er geen records voor een plaatsnaam zijn, gebruik dan een lege array [].
 - Volgorde (optioneel maar gewenst): sorteer per plaatsnaam de records primair op datum (oplopend; null laatst), secundair op dagdeel met volgorde ochtend < middag < avond < hele dag < null.
 
 Outputformaat: geef uitsluitend één JSON-object terug met precies de 27 plaatsnaamkeys, en per key een array van objecten met exact de velden (en sleutelvolgorde):
-{
+{{
   "<plaatsnaam>": [
-    {
+    {{
       "datum": "<YYYY-MM-DD of null>",
       "dagdeel": "<ochtend|middag|avond|hele dag|null>",
       "informatie": "<exacte ongewijzigde tekst>"
-    }
+    }}
   ],
   ...
-}
+}}
 
 Input:
 <<<{payload}>>>
@@ -111,26 +111,26 @@ Input:
 PROMPT3_TEMPLATE = """Doel: Neem de input die onderaan vermeldt staat en produceer één JSON-object. Bundel per plaatsnaam + datum + dagdeel alle records tot maximaal één entry per dagdeel (ochtend, middag, avond, hele dag). De inhoud van "informatie" blijft exact zoals in de input; er worden geen woorden gewijzigd of toegevoegd, behalve een vaste scheiding tussen samengevoegde fragmenten.
 
 Regels:
-- Scope & behoud
+1. Scope & behoud
     - Werk per plaatsnaam (top-level key).
     - Binnen een plaatsnaam werk je per datum (YYYY-MM-DD of null).
     - Binnen een datum bundel je per dagdeel tot maximaal één record voor elk van: "ochtend", "middag", "avond", "hele dag".
     - De tekst in "informatie" blijft exact; niet herschrijven of interpreteren.
-- Samenvoegen "informatie"
+2. Samenvoegen "informatie"
     - Verzamel alle records met dezelfde (plaatsnaam, datum, dagdeel).
     - Behoud de volgorde van de fragmenten zoals ze in de input-array voorkomen.
     - Plak alle "informatie"-fragmenten achter elkaar met exact deze scheiding tussen fragmenten: "\n" (één newline-karakter).
     - Verwijder exacte duplicaten van fragmenten binnen dezelfde combinatie (stringvergelijking 1-op-1).
-- Waarden voor "dag"
-    - Als binnen (plaats, datum, dagdeel) alle "dag" waarden gelijk zijn → gebruik die waarde.
-    - Anders kies de meest frequente niet-null waarde. Bij gelijke frequentie: kies de eerstvoorkomende niet-null in inputvolgorde.
-    - Als alle "dag" null zijn maar "datum" niet-null is → bepaal de Nederlandse dagnaam uit de datum (Europe/Amsterdam).
-    - Als "datum" ook null is → "dag" = null.
-- Waarden voor "dagdeel"
+4. Waarden voor "dagdeel"
     - Gebruik exact één van: "ochtend", "middag", "avond", "hele dag".
     - Maak nooit extra varianten aan.
-- Outputstructuur per plaatsnaam
-    - De value is een array met records. Per record exact deze sleutels en volgorde: { "dag": "<string of null>", "datum": "<YYYY-MM-DD of null>", "dagdeel": "<ochtend|middag|avond|hele dag>", "informatie": "<samengevoegde tekst, fragmenten gescheiden door één newline-karakter>" }
+5. Outputstructuur per plaatsnaam
+    - De value is een array met records. Per record exact deze sleutels en volgorde: 
+    {{
+    "datum": "<YYYY-MM-DD of null>",
+    "dagdeel": "<ochtend|middag|avond|hele dag>",
+    "informatie": "<samengevoegde tekst, fragmenten gescheiden door één newline-karakter>"
+    }}
     - Per (plaatsnaam, datum) mogen maximaal 4 records bestaan (één per dagdeel dat voorkomt). Dagdelen die niet voorkomen laat je weg.
     - Sorteer binnen elke plaatsnaam: primair op "datum" oplopend (null laatst), secundair op dagdeel met volgorde: ochtend < middag < avond < hele dag.
 
@@ -147,7 +147,7 @@ Neem de input (onderaan) en produceer één JSON-object in de exacte structuur z
 Regels
 
 1) Scope
-- Input is een JSON-object met plaatsnamen als keys. Elke plaatsnaam bevat een array van records met sleutels "dag", "datum", "dagdeel", "informatie".
+- Input is een JSON-object met plaatsnamen als keys. Elke plaatsnaam bevat een array van records met sleutels "datum", "alert", "dagdeel", "informatie".
 - Output moet een JSON-object zijn met dezelfde plaatsnamen (alle 27 locaties, zie lijst hieronder). Voor locaties die in de input ontbreken → geef een array met één default record (zie regel 6).
 
 2) Alerts
@@ -175,29 +175,29 @@ Uit elk "informatie"-veld haal je, exact en zonder interpretatie, de volgende pa
 
 5) Outputstructuur
 Per locatie is de value een array van dagrecords. Elk dagrecord:
-{
+{{
   "date": "YYYY-MM-DD" of null,
   "alert": <boolean>,
-  "parts": {
-    "ochtend": { "swell_m": <number or null>, "wave_height": "<string or null>", "period_s": <number or null>, "wind_bft": <integer or null>, "wind_kmh": <integer or null>, "wind_dir": "<string or null>", "tide": "<string or null>", "tide_score": "<string or null>", "clean": "<string or null>", "go_beginner": "<string or null>", "go_advanced": "<string or null>" },
-    "middag": { ...zelfde structuur... },
-    "avond": { ...zelfde structuur... },
-    "hele dag": { ...zelfde structuur... }
-  }
-}
+  "parts": {{
+    "ochtend": {{ "swell_m": <number or null>, "wave_height": "<string or null>", "period_s": <number or null>, "wind_bft": <integer or null>, "wind_kmh": <integer or null>, "wind_dir": "<string or null>", "tide": "<string or null>", "tide_score": "<string or null>", "clean": "<string or null>", "go_beginner": "<string or null>", "go_advanced": "<string or null>" }},
+    "middag": {{ ...zelfde structuur... }},
+    "avond": {{ ...zelfde structuur... }},
+    "hele dag": {{ ...zelfde structuur... }}
+  }}
+}}
 
 6) Compleetheid
 - Alle 27 locaties moeten als key aanwezig zijn (lowercase). Voor locaties die niet in de input zaten → array met één record:
-  {
+  {{
     "date": null,
     "alert": false,
-    "parts": {
-      "ochtend": {...alle velden null...}, 
-      "middag": {...alle velden null...}, 
-      "avond": {...alle velden null...},
-      "hele dag": {...alle velden null...} 
-    }
-  }
+    "parts": {{
+      "ochtend": {{...alle velden null...}}, 
+      "middag": {{...alle velden null...}}, 
+      "avond": {{...alle velden null...}},
+      "hele dag": {{...alle velden null...}}
+    }}
+  }}
 
 Output
 Geef uitsluitend het JSON-object terug in exact deze structuur en sleutelvolgorde. Geen tekst erbuiten.

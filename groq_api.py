@@ -239,7 +239,8 @@ def groq_process_text(text):
         model="llama-3.3-70b-versatile",
         stream=False,
         temperature=0.2,
-    )
+        response_format={"type": "json_object"},
+)
     step1_answer = step1_resp.choices[0].message.content
 
     # Stap 2: regio’s naar plaatsen herverdelen op basis van stap 1
@@ -251,6 +252,8 @@ def groq_process_text(text):
         model="llama-3.3-70b-versatile",
         stream=False,
         temperature=0.2,
+        response_format={"type": "json_object"},
+
     )
     step2_answer = step2_resp.choices[0].message.content
 

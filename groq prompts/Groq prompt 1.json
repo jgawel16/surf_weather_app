@@ -1,0 +1,96 @@
+Je krijgt hieronder een informeel surfweerbericht in het Nederlands. De tekst bevat essentiële informatie over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België. De tekst is slordig geschreven en bevat afkortingen, cryptische omschrijvingen en soms halve zinnen.
+
+Doel: knip het bericht op in losse stukken informatie per locatie en datum.
+
+Regels:
+- De tekst blijft EXACT hetzelfde, verander hier niets aan en maak geen interpretaties. De enige uitzondering hierop is regel 2 (normaliseren van locaties).
+- Normaliseer varianten en schrijfwijzen van locaties. Bijvoorbeeld: - “HvH”, “hvh”, “hoek vh” → “Hoek van Holland” - “Schev”, “schev n”, “scheveningen noord” → “Scheveningen” - “wijk”, “wijk aan” → “Wijk aan Zee” - “zvoort” → “Zandvoort” - "Z-H" of "ZH" → Zuid-Holland - "BE" → "België"
+- Locaties:
+    - Als een los stuk informatie 1 specifieke locatie aanduiding heeft, koppel dit dan aan een van de locaties uit de volgende lijst: [Nederland, Zeeland, Domburg, Cadzand, Zuid-Holland, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Noord-Holland, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Wadden, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog, België, De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist].
+    - Als een los stuk informatie meerdere locatie aanduidingen heeft (zoals Texel en De Koog in één zin), koppel dan alle corresponderende locaties.
+    - Als er GEEN locatie wordt genoemd: gebruik dan "Nederland&België" als locatie.
+- Het volledige bericht moet terug komen in de output. Dit betekent dat er geen zinnen achterwege gelaten kunnen worden.
+- Datum: 
+    - Als expliciete datum genoemd is → gebruik die.
+    - Als alleen weekdag genoemd is → pak de eerstvolgende kalenderdatum met die dag, relatief ten opzichte van vandaag (op uitvoeringstijdstip) in tijdzone Europe/Amsterdam. 
+    - Notatie: ISO (YYYY-MM-DD).
+- Dagdeel: 
+    - Als er een tijdstip wordt genoemd: gebruik "ochtend"(06:00–11:59), "middag"(12:00–17:59), "avond"(18:00–23:59). 
+    - Als alleen een dag genoemd is → gebruik "hele dag".
+    - Meerdere tijden/dagdelen → splits in aparte records.
+
+Output:
+Geef een JSON-object als output. Gebruik exact deze structuur, benaming, en key-volgorde: { "<locatie>": [ { "dag": "",
+"datum": "YYYY-MM-DD", "dagdeel":"", "informatie": "" } ] }
+
+Invoer: 
+<<< {tekst} >>>
+
+
+
+
+--------------------------------------------------------------- OPTIE 2
+
+
+
+Je krijgt hieronder een informeel surfweerbericht in het Nederlands. De tekst bevat essentiële informatie over surfcondities op specifieke locaties, dagen en dagdelen in Nederland en België. De tekst is slordig geschreven en bevat afkortingen, cryptische omschrijvingen en soms halve zinnen.
+
+Doel: knip het bericht op in losse stukken informatie per locatie en datum.
+
+Regels:
+
+1) Tekstbehoud
+- De inhoud van elk los stuk blijft EXACT zoals in de bron (inclusief hashtags, haakjes, interpunctie). Verander niets en maak geen interpretaties.
+- Alleen spaties aan het begin/einde van "informatie" mogen worden getrimd.
+- Normaliseren is uitsluitend toegestaan voor LOCATIENAMEN (zie regel 2).
+
+2) Normaliseren van locaties
+- Normaliseer varianten en schrijfwijzen van locaties naar standaardnamen. Voorbeelden:
+  - "HvH", "hvh", "hoek vh" → "Hoek van Holland"
+  - "Schev", "schev n", "scheveningen noord" → "Scheveningen"
+  - "wijk", "wijk aan" → "Wijk aan Zee"
+  - "zvoort" → "Zandvoort"
+  - "Z-H" of "ZH" → "Zuid-Holland"
+  - "BE" → "België"
+
+3) Toegestane locaties (en alleen deze)
+[Nederland, Nederland&België, Zeeland, Domburg, Cadzand, Zuid-Holland, Hoek van Holland, Kijkduin, Ter Heijde, Scheveningen, Katwijk, Wassenaar, Ouddorp, Maasvlakte, Zandmotor zuid, Noord-Holland, Wijk aan Zee, IJmuiden, Egmond, Bergen, Petten, Noordwijk, Zandvoort, Wadden, Texel, Vlieland, Terschelling, Ameland, Schiermonnikoog, België, De Panne, Middelkerke, Oostende, Zeebrugge, Knokke-Heist]
+
+4) Locatie-koppeling
+- Als een los stuk 1 locatie aanduidt → koppel aan die ene locatie (na normalisatie) uit de lijst van regel 3.
+- Als een los stuk meerdere locaties aanduidt (bv. “Texel en De Koog”) → maak voor elke corresponderende locatie een afzonderlijk record met dezelfde "informatie".
+- Als er GEEN locatie wordt genoemd → gebruik "Nederland&België" als locatie.
+
+5) Volledige dekking
+- Het volledige bericht moet terugkomen in de output: laat geen uitspraken achterwege. Indien een zin meerdere onafhankelijke informatie-eenheden bevat (bv. verschillende tijden of waarschuwingen), splits deze dan in meerdere records (met dezelfde locatie(s) waar van toepassing).
+
+6) Datum en dag
+- Als expliciete kalenderdatum genoemd is → gebruik die datum (ISO: YYYY-MM-DD).
+- Als alleen een weekdag genoemd is → gebruik de eerstvolgende kalenderdatum met die dag, relatief t.o.v. vandaag (uitvoeringstijdstip) in tijdzone Europe/Amsterdam.
+- Noteer de (Nederlandse) dagnaam in "dag" exact zoals genoemd (bv. "maandag"). Als de dag indirect is (afgeleid uit de gekozen datum), vul dan de juiste Nederlandse dagnaam in.
+- Als geen dag/datum te bepalen is → zet "dag" = null en "datum" = null.
+
+7) Dagdeel
+- Als er een tijdstip is genoemd, map naar:
+  - "ochtend" (06:00–11:59), "middag" (12:00–17:59), "avond" (18:00–23:59).
+- Als alleen een dag is genoemd zonder tijd → gebruik "hele dag".
+- Als meerdere tijden/dagdelen in één stuk voorkomen → splits in aparte records.
+- Als geen dagdeel te herleiden is → "dagdeel" = null.
+
+8) Output
+- Geef één JSON-object terug met locaties als keys (alleen waarden uit regel 3).
+- De value per locatie is een array van records. Voor elk record gebruik je exact deze structuur en sleutelvolgorde:
+
+{
+  "<locatie>": [
+    {
+      "dag": "<nl-dagnaam of null>",
+      "datum": "YYYY-MM-DD of null",
+      "dagdeel": "ochtend|middag|avond|hele dag|null",
+      "informatie": "<exact tekstfragment uit bron>"
+    }
+  ]
+}
+
+Invoer:
+<<<{text}>>>

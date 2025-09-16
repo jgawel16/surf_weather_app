@@ -1,0 +1,66 @@
+Doel
+Neem de input (onderaan) en produceer één JSON-object in de exacte structuur zoals hieronder gedefinieerd. Zet de bestaande records om naar een genormaliseerd schema met "alert" en parameters. Er mag geen enkele interpretatie of toevoeging plaatsvinden buiten de regels hieronder.
+
+Regels
+
+1) Scope
+- Input is een JSON-object met plaatsnamen als keys. Elke plaatsnaam bevat een array van records met sleutels "dag", "datum", "dagdeel", "informatie".
+- Output moet een JSON-object zijn met dezelfde plaatsnamen (alle 27 locaties, zie lijst hieronder). Voor locaties die in de input ontbreken → geef een array met één default record (zie regel 6).
+
+2) Alerts
+- Zoek in elk "informatie"-veld naar expliciete waarschuwingen.
+- Als er een van deze woorden/uitdrukkingen voorkomt (hoofdletterongevoelig): ["gevaarlijk", "geen beginners", "niet te doen", "stroomt hard", "af te raden"] → zet `"alert": true`.
+- Anders altijd `"alert": false`.
+
+3) Parameters
+Uit elk "informatie"-veld haal je, exact en zonder interpretatie, de volgende parameters. Als iets niet letterlijk aanwezig of ondubbelzinnig is → null.
+- `swell_m`: als hoogte in cm → omrekenen naar meter (50cm → 0.5). Als range (bijv. "40-60cm") → gemiddelde, afgerond op 1 decimaal (50cm → 0.5). In meters ("1-1.5m") idem. Vage termen ("klein", "flat") → null.
+- `wave_height`: exacte omschrijving van golf hoogte uit tekst ("1-1,5m", "flat", "weinig", "heuphoog"). Geen data → null.
+- `period_s`: periode, numeriek in seconden. Bij range → gemiddelde, afgerond op geheel getal. Geen data → null.
+- `wind_bft`: integer uit tekst ("3 bft"). Geen data → null.
+- `wind_kmh`: alleen als letterlijk vermeld. Geen data → null.
+- `wind_dir`: windrichting uit tekst mappen naar officiële lijst: [N, NNO, NO, ONO, O, OZO, ZO, ZZO, Z, ZZW, ZW, WZW, W, WNW, NW, NNW]. Altijd UPPERCASE. Geen data → null.
+- `tide`: exacte term uit tekst over getij ("laag", "opkomend tij", "mid-tij"). Geen data → null.
+- `tide_score`: alleen een van ["slecht", "medium", "goed"]. Mapping: als de tekst een kwalificatie geeft ("pas goed na 9u" → "goed"). Geen data → null.
+- `clean`: "ja", "nee", of null. Voorbeeld: "clean kansen" → "ja", "niet zeker clean" → "nee". Geen data → null.
+- `go_advanced`: exacte tekstfragmenten met adviezen voor ervaren surfers. Als meerdere → combineer met "\n". Geen data → null.
+- `go_beginner`: exacte tekstfragmenten met adviezen voor beginnende surfers. Als meerdere → combineer met "\n". Geen data → null.
+
+4) Dagdelen
+- Elk record moet in "parts" verdeeld worden naar vier dagdelen: "ochtend", "middag", "avond", "hele dag".
+- Voor dagdelen zonder data → alle parameters = null.
+
+5) Outputstructuur
+Per locatie is de value een array van dagrecords. Elk dagrecord:
+{
+  "date": "YYYY-MM-DD" of null,
+  "alert": <boolean>,
+  "parts": {
+    "ochtend": { "swell_m": <number or null>, "wave_height": "<string or null>", "period_s": <number or null>, "wind_bft": <integer or null>, "wind_kmh": <integer or null>, "wind_dir": "<string or null>", "tide": "<string or null>", "tide_score": "<string or null>", "clean": "<string or null>", "go_beginner": "<string or null>", "go_advanced": "<string or null>" },
+    "middag": { ...zelfde structuur... },
+    "avond": { ...zelfde structuur... },
+    "hele dag": { ...zelfde structuur... }
+  }
+}
+
+6) Compleetheid
+- Alle 27 locaties moeten als key aanwezig zijn (lowercase). Voor locaties die niet in de input zaten → array met één record:
+  {
+    "date": null,
+    "alert": false,
+    "parts": {
+      "ochtend": {...alle velden null...},
+      "middag": {...alle velden null...},
+      "avond": {...alle velden null...},
+      "hele dag": {...alle velden null...}
+    }
+  }
+
+Output
+Geef uitsluitend het JSON-object terug in exact deze structuur en sleutelvolgorde. Geen tekst erbuiten.
+
+Locatielijst (27)
+["texel", "vlieland", "terschelling", "ameland", "schiermonnikoog", "wijk aan zee", "ijmuiden", "egmond", "bergen", "petten", "zandvoort", "noordwijk", "katwijk", "wassenaar", "scheveningen", "ter heijde", "zandmotor zuid", "hoek van holland", "kijkduin", "ouddorp", "maasvlakte", "domburg", "cadzand", "de panne", "middelkerke", "oostende", "zeebrugge", "knokke-heist"]
+
+Input:
+<<<{data}>>>

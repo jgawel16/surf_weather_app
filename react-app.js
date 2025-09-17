@@ -98,13 +98,59 @@ async function loadFromSupabase(){
   return payload;
 }
 
+/* ===== Sidebar (desktop) ===== */
+function Sidebar({ page, setPage }) {
+  return window.React.createElement('aside', { className: 'hidden md:flex flex-col w-40 border-r p-4 gap-6' },
+    window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'h-10 w-auto mb-6' }),
+    window.React.createElement('nav', { className: 'flex flex-col gap-4 text-sm' },
+      ['home','cams'].map(item =>
+        window.React.createElement('button', {
+          key: item,
+          onClick: () => setPage(item),
+          className: `flex items-center gap-2 px-2 py-1 rounded ${page===item?'font-bold text-purple-600':'text-gray-600 hover:text-black'}`
+        },
+          window.React.createElement('span', { className:'material-icons' },
+            item === 'home' ? 'home' : 'videocam'
+          ),
+          item === 'home' ? 'Home' : 'Cams'
+        )
+      )
+    )
+  );
+}
+
+/* ===== BottomNav (mobiel) ===== */
+function BottomNav({ page, setPage }) {
+  return window.React.createElement('nav', { className: 'md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2' },
+    ['home','cams'].map(item =>
+      window.React.createElement('button', {
+        key: item,
+        onClick: () => setPage(item),
+        className: `${page===item?'text-purple-600':'text-gray-600'} flex flex-col items-center text-xs`
+      },
+        window.React.createElement('span', { className:'material-icons' },
+          item === 'home' ? 'home' : 'videocam'
+        ),
+        item === 'home' ? 'Home' : 'Cams'
+      )
+    )
+  );
+}
+
+/* ===== Dummy CamsPage ===== */
+function CamsPage() {
+  return window.React.createElement('div', { className: 'p-6' },
+    window.React.createElement('h1', { className: 'text-2xl font-bold mb-4' }, 'Live Surf Cams'),
+    window.React.createElement('p', { className: 'text-slate-600' }, 'Hier komen later livecams van verschillende surfspots.')
+  );
+}
+
 /* ===== Dropdown component ===== */
 function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const dropdownRef = window.React.useRef(null);
 
-  // klik buiten menu -> sluit
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -119,17 +165,14 @@ function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
     (getSpotMeta(id).name || id).toLowerCase().includes(query.toLowerCase())
   );
 
-  // "Alles" checkbox status
   const allSelected = allSpotIds.length > 0 && selectedSpots.length === allSpotIds.length;
 
   function toggleAll() {
     if (allSelected) {
-      // alles uit
       allSpotIds.forEach(id => {
         if (selectedSpots.includes(id)) toggleSpot(id);
       });
     } else {
-      // alles aan
       allSpotIds.forEach(id => {
         if (!selectedSpots.includes(id)) toggleSpot(id);
       });
@@ -137,7 +180,6 @@ function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
   }
 
   return window.React.createElement('div', { className: 'relative inline-block w-64', ref: dropdownRef },
-    // knop
     window.React.createElement('button', {
       onClick: () => setOpen(!open),
       className: 'w-full flex justify-between items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm hover:bg-gray-50'
@@ -147,7 +189,6 @@ function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
         window.React.createElement('path', { strokeLinecap:'round', strokeLinejoin:'round', strokeWidth:'2', d:'M19 9l-7 7-7-7' })
       )
     ]),
-    // menu
     open && window.React.createElement('div', {
       className: 'absolute mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 max-h-80 overflow-y-auto z-20'
     },
@@ -157,7 +198,6 @@ function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
           value:query, onChange:e=>setQuery(e.target.value),
           className:'w-full border rounded-md p-1 text-sm'
         }),
-        // "Alles" checkbox
         window.React.createElement('label', { className:'flex items-center text-sm font-semibold border-b pb-1 mb-1' },
           window.React.createElement('input', {
             type:'checkbox',
@@ -185,8 +225,8 @@ function SpotDropdown({ allSpotIds, selectedSpots, toggleSpot, loading }) {
   );
 }
 
-/* ===== App ===== */
-function App(){
+/* ===== Forecast HomePage ===== */
+function HomePage() {
   const [data, setData] = useState({});
   const [selectedSpots, setSelectedSpots] = useState([]);
   const [filterBest, setFilterBest] = useState(false);
@@ -274,27 +314,19 @@ function App(){
 
   const allSpotIds = Object.keys(data || {});
 
-  return window.React.createElement('div', { className: 'space-y-6' },
+  return window.React.createElement('div', { className: 'space-y-6 p-6' },
 
-    // ===== HEADER (GEEN toggle meer hier) =====
-    window.React.createElement('header', { className: 'flex flex-col items-center gap-2' },
-      window.React.createElement('img', {
-        src: './Ingezoomd logo.png',
-        alt: 'Surf Forecast logo',
-        className: 'h-8 sm:h-10 w-auto object-contain'
-      }),
-      window.React.createElement('div', { className: 'text-sm text-slate-600 text-center' },
-        errMsg ? `Fout: ${errMsg}` : 'AI gestuurde surfdata, recht op je beeldscherm!'
-      )
+    // Header-quote (zoals Surfnerd voorbeeld)
+    window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center' },
+      window.React.createElement('h1', { className: 'text-xl font-bold mb-2' }, "AI gestuurde surfdata"),
+      window.React.createElement('p', { className: 'italic text-slate-600' }, "Recht op je beeldscherm, niets meer en niets minder.")
     ),
 
-    // ===== FAVORIETEN: dropdown + toggle in hetzelfde kaartje =====
+    // Favorieten selectie
     window.React.createElement('section', { className: 'card p-4' },
       window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
       window.React.createElement('div', { className: 'flex flex-col sm:flex-row gap-3' },
-        // dropdown
         window.React.createElement(SpotDropdown, { allSpotIds, selectedSpots, toggleSpot, loading }),
-        // toggle in zelfde stijl als dropdown
         window.React.createElement('label', {
           className: 'w-64 flex items-center rounded-md border border-gray-300 shadow-sm px-3 py-2 bg-white text-sm cursor-pointer'
         },
@@ -309,7 +341,7 @@ function App(){
       )
     ),
 
-    // ===== CONTENT =====
+    // Forecast content
     (loading
       ? window.React.createElement('div', { className: 'text-center py-16' }, 'Laden…')
       : spotsToShow().map(spotId => {
@@ -374,6 +406,21 @@ function App(){
           );
         })
     )
+  );
+}
+
+/* ===== App ===== */
+function App(){
+  const [page, setPage] = useState('home');
+
+  return window.React.createElement('div', { className: 'flex min-h-screen' },
+    window.React.createElement(Sidebar, { page, setPage }),
+    window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0' },
+      page === 'home'
+        ? window.React.createElement(HomePage)
+        : window.React.createElement(CamsPage)
+    ),
+    window.React.createElement(BottomNav, { page, setPage })
   );
 }
 

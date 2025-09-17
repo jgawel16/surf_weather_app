@@ -336,53 +336,61 @@ function HomePage() {
     return bestSpot ? [bestSpot, ...active.filter(s => s !== bestSpot)] : active;
   }
 
-  // Drag-scroll fix
-  useEffect(() => {
-    const sliders = document.querySelectorAll(".draggable-slider");
-    const cleanups = [];
+// Drag/swipe horizontaal voor forecast sliders
+useEffect(() => {
+  const sliders = Array.from(document.querySelectorAll('.draggable-slider'));
+  if (!sliders.length) return;
 
-    sliders.forEach(slider => {
-      let isDown = false;
-      let startX;
-      let scrollLeft;
+  const cleanups = [];
+  sliders.forEach(slider => {
+    slider.style.touchAction = 'pan-y';
+    slider.style.userSelect = 'none';
 
-      function handleDown(e) {
-        isDown = true;
-        slider.classList.add("cursor-grabbing");
-        startX = e.pageX - slider.offsetLeft;
-        scrollLeft = slider.scrollLeft;
-      }
-      function handleLeave() {
-        isDown = false;
-        slider.classList.remove("cursor-grabbing");
-      }
-      function handleUp() {
-        isDown = false;
-        slider.classList.remove("cursor-grabbing");
-      }
-      function handleMove(e) {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 1;
-        slider.scrollLeft = scrollLeft - walk;
-      }
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
 
-      slider.addEventListener("mousedown", handleDown);
-      slider.addEventListener("mouseleave", handleLeave);
-      slider.addEventListener("mouseup", handleUp);
-      slider.addEventListener("mousemove", handleMove);
+    const onDown = (e) => {
+      isDown = true;
+      startX = e.pageX || e.touches[0].pageX;
+      scrollLeft = slider.scrollLeft;
+      slider.classList.add('cursor-grabbing');
+    };
 
-      cleanups.push(() => {
-        slider.removeEventListener("mousedown", handleDown);
-        slider.removeEventListener("mouseleave", handleLeave);
-        slider.removeEventListener("mouseup", handleUp);
-        slider.removeEventListener("mousemove", handleMove);
-      });
+    const onMove = (e) => {
+      if (!isDown) return;
+      const x = e.pageX || (e.touches && e.touches[0].pageX);
+      const walk = x - startX;
+      slider.scrollLeft = scrollLeft - walk;
+    };
+
+    const onUp = () => {
+      isDown = false;
+      slider.classList.remove('cursor-grabbing');
+    };
+
+    slider.addEventListener('mousedown', onDown);
+    slider.addEventListener('mousemove', onMove);
+    slider.addEventListener('mouseup', onUp);
+    slider.addEventListener('mouseleave', onUp);
+
+    slider.addEventListener('touchstart', onDown, { passive: true });
+    slider.addEventListener('touchmove', onMove, { passive: true });
+    slider.addEventListener('touchend', onUp);
+
+    cleanups.push(() => {
+      slider.removeEventListener('mousedown', onDown);
+      slider.removeEventListener('mousemove', onMove);
+      slider.removeEventListener('mouseup', onUp);
+      slider.removeEventListener('mouseleave', onUp);
+      slider.removeEventListener('touchstart', onDown);
+      slider.removeEventListener('touchmove', onMove);
+      slider.removeEventListener('touchend', onUp);
     });
+  });
 
-    return () => cleanups.forEach(fn => fn());
-  }, []);
+  return () => cleanups.forEach(fn => fn());
+}, [data, selectedSpots, filterBest]);
 
   const allSpotIds = Object.keys(data || {});
 

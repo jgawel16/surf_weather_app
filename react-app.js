@@ -234,6 +234,14 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
 
+  // Dummy sms-data (later komt dit uit Supabase)
+  const dummySms = {
+    conclusion: "Goede surfmomenten vandaag, vooral in Zeeland.",
+    notes_height: "Golfhoogte beter in Domburg, elders klein.",
+    notes_wind: "Wind ZW 4 bft, wat rommelig.",
+    notes_period: "Periode nog kort, betere sets later."
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -293,7 +301,8 @@ function HomePage() {
       wind_dir,
       wind_type,
       score,
-      summary: buildConclusion({ score })
+      summary: buildConclusion({ score }),
+      sms: dummySms // <-- tijdelijk dummy data
     };
   }
 
@@ -315,15 +324,13 @@ function HomePage() {
 
   const allSpotIds = Object.keys(data || {});
 
-return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-x-hidden' },
+  return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-hidden' },
 
-  // Header-quote
-  window.React.createElement('section', { 
-    className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' 
-  },
-    window.React.createElement('h1', { className: 'text-xl font-bold mb-1 break-words' }, "AI gestuurde surfforecast"),
-    window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
-  ),
+    // Header-quote
+    window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' },
+      window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
+      window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
+    ),
 
     // Favorieten selectie
     window.React.createElement('section', { className: 'card p-4' },
@@ -361,7 +368,11 @@ return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-
             window.React.createElement('div', { className: 'overflow-x-auto h-scroll flex gap-4 py-2 draggable-slider' },
               aggs.map(ag => {
                 const color = mapScoreToColor(ag.score);
+                const sms = ag.sms || {};
+                const conclusion = sms.conclusion || ag.summary;
+
                 return window.React.createElement('div', { key: ag.date, className: `min-w-[320px] p-3 card ${color.classDay}` },
+                  // datum + alert
                   window.React.createElement('div', { className: 'flex justify-between items-start mb-2' },
                     window.React.createElement('div', null,
                       window.React.createElement('div', { className: 'font-semibold' }, new Date(ag.date).toLocaleDateString('nl-NL', { weekday: 'long' })),
@@ -369,7 +380,11 @@ return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-
                     ),
                     ag.alert ? window.React.createElement('div', { className: 'alert-badge', style: { background: 'var(--accent)' }, title: 'Alert aanwezig' }, '⚠') : null
                   ),
-                  window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
+
+                  // Conclusie
+                  window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, conclusion),
+
+                  // Parameters per dagdeel
                   window.React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
                     PART_KEYS.map(part => {
                       const p = ag.parts?.[part] || {};
@@ -384,19 +399,41 @@ return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-
                       const windKmh = (p.wind_kmh != null) ? Math.round(p.wind_kmh)
                                     : (p.wind_bft != null ? bftToKmh(p.wind_bft)
                                     : (ag.wind_bft != null ? bftToKmh(ag.wind_bft) : null));
+
                       return window.React.createElement('div', { key: part, className: `p-3 ${partColor.classPart}` },
                         window.React.createElement('div', { className: 'text-sm font-semibold capitalize mb-1' },
                           PART_LABELS[part] || part
                         ),
-                        window.React.createElement('div', { className: 'text-xs text-slate-400' }, 'Golfhoogte'),
+
+                        // Hoogte
+                        window.React.createElement('div', { className: 'text-xs text-slate-400 flex items-center' }, 'Golfhoogte',
+                          sms.notes_height && window.React.createElement('span', {
+                            className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
+                            title: sms.notes_height
+                          }, 'info')
+                        ),
                         window.React.createElement('div', { className: 'font-semibold' },
                           (p.swell_m ?? ag.swell_m) != null ? `${((p.swell_m ?? ag.swell_m)).toFixed(1)} m` : '—'
                         ),
-                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Swell Periode'),
+
+                        // Periode
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Swell Periode',
+                          sms.notes_period && window.React.createElement('span', {
+                            className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
+                            title: sms.notes_period
+                          }, 'info')
+                        ),
                         window.React.createElement('div', { className: 'font-semibold' },
                           (p.period_s ?? ag.period_s) != null ? `${(p.period_s ?? ag.period_s)}s` : '—'
                         ),
-                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Wind'),
+
+                        // Wind
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Wind',
+                          sms.notes_wind && window.React.createElement('span', {
+                            className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
+                            title: sms.notes_wind
+                          }, 'info')
+                        ),
                         window.React.createElement('div', { className: 'font-semibold' },
                           `${p.wind_dir || ag.wind_dir || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
                         )

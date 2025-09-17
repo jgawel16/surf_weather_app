@@ -50,13 +50,17 @@ const DEFAULT_PART_VALUES = { swell_m: 0, period_s: 0, wind_bft: 0, wind_dir: nu
 function degDiff(a, b) { let d = Math.abs(a - b) % 360; if (d > 180) d = 360 - d; return d; }
 function normalizeWindDir(dir) {
   if (!dir) return null;
+  const t = String(dir).trim().toUpperCase();
   const MAP = {
-    'N': 'N','NNO': 'NNO','NO': 'NO','ONO': 'ONO',
-    'O': 'O','OZO': 'OZO','ZO': 'ZO','ZZO': 'ZZO',
-    'Z': 'Z','ZZW': 'ZZW','ZW': 'ZW','WZW': 'WZW',
-    'W': 'W','WNW': 'WNW','NW': 'NW','NNW': 'NNW'
+    'N': 'N','NOORD': 'N','NNO': 'NNO','NOORDNOORDOOST': 'NNO',
+    'NO': 'NO','NOORDOOST': 'NO','ONO': 'ONO','OOSTNOORDOOST': 'ONO',
+    'O': 'O','OOST': 'O','OZO': 'OZO','OOSTZUIDOOST': 'OZO',
+    'ZO': 'ZO','ZUIDOOST': 'ZO','ZZO': 'ZZO','ZUIDZUIDOOST': 'ZZO',
+    'Z': 'Z','ZUID': 'Z','ZZW': 'ZZW','ZUIDZUIDWEST': 'ZZW',
+    'ZW': 'ZW','ZUIDWEST': 'ZW','WZW': 'WZW','WESTZUIDWEST': 'WZW',
+    'W': 'W','WEST': 'W','WNW': 'WNW','WESTNOORDWEST': 'WNW',
+    'NW': 'NW','NOORDWEST': 'NW','NNW': 'NNW','NOORDNOORDWEST': 'NNW'
   };
-  const t = String(dir).split(/[\/\s,]+/)[0].toUpperCase();
   return MAP[t] || dir;
 }
 function parseWindDirString(dir){
@@ -474,37 +478,5 @@ window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0 w-full max
     window.React.createElement(BottomNav, { page, setPage })
   );
 }
-/* ===== Drag-to-scroll helper ===== */
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".draggable-slider").forEach(slider => {
-    let isDown = false;
-    let startX;
-    let scrollLeft;
 
-    slider.addEventListener("mousedown", (e) => {
-      isDown = true;
-      slider.classList.add("cursor-grabbing");
-      startX = e.pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-    });
-
-    slider.addEventListener("mouseleave", () => {
-      isDown = false;
-      slider.classList.remove("cursor-grabbing");
-    });
-
-    slider.addEventListener("mouseup", () => {
-      isDown = false;
-      slider.classList.remove("cursor-grabbing");
-    });
-
-    slider.addEventListener("mousemove", (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - slider.offsetLeft;
-      const walk = (x - startX) * 1; // snelheid drag
-      slider.scrollLeft = scrollLeft - walk;
-    });
-  });
-});
 window.ReactDOM.createRoot(document.getElementById('app')).render(window.React.createElement(App));

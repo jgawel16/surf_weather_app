@@ -113,7 +113,7 @@ async function loadFromSupabase(){
   return payload;
 }
 
-/* ===== Sidebar (desktop) ===== */
+/* ===== Sidebar ===== */
 function Sidebar({ page, setPage }) {
   return window.React.createElement('aside', { className: 'hidden md:flex flex-col w-40 border-r p-4 gap-6' },
     window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'h-10 w-auto mb-6 object-contain' }),
@@ -135,7 +135,7 @@ function Sidebar({ page, setPage }) {
   );
 }
 
-/* ===== BottomNav (mobiel) ===== */
+/* ===== BottomNav ===== */
 function BottomNav({ page, setPage }) {
   return window.React.createElement('nav', { className: 'md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2' },
     ['home','cams'].map(item =>
@@ -151,7 +151,6 @@ function BottomNav({ page, setPage }) {
     )
   );
 }
-
 
 /* ===== Dummy CamsPage ===== */
 function CamsPage() {
@@ -249,7 +248,7 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
 
-  // Dummy sms-data (later komt dit uit Supabase)
+  // Dummy sms-data
   const dummySms = {
     conclusion: "Goede surfmomenten vandaag, vooral in Zeeland.",
     notes_height: "Golfhoogte beter in Domburg, elders klein.",
@@ -317,7 +316,7 @@ function HomePage() {
       wind_type,
       score,
       summary: buildConclusion({ score }),
-      sms: dummySms // <-- tijdelijk dummy data
+      sms: dummySms
     };
   }
 
@@ -337,10 +336,11 @@ function HomePage() {
     return bestSpot ? [bestSpot, ...active.filter(s => s !== bestSpot)] : active;
   }
 
-  const allSpotIds = Object.keys(data || {});
-  // Drag-to-scroll activeren voor forecast sliders
+  // Drag-scroll fix
   useEffect(() => {
     const sliders = document.querySelectorAll(".draggable-slider");
+    const cleanups = [];
+
     sliders.forEach(slider => {
       let isDown = false;
       let startX;
@@ -364,7 +364,7 @@ function HomePage() {
         if (!isDown) return;
         e.preventDefault();
         const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 1; // scrollsnelheid
+        const walk = (x - startX) * 1;
         slider.scrollLeft = scrollLeft - walk;
       }
 
@@ -373,25 +373,24 @@ function HomePage() {
       slider.addEventListener("mouseup", handleUp);
       slider.addEventListener("mousemove", handleMove);
 
-      // opruimen
-      return () => {
+      cleanups.push(() => {
         slider.removeEventListener("mousedown", handleDown);
         slider.removeEventListener("mouseleave", handleLeave);
         slider.removeEventListener("mouseup", handleUp);
         slider.removeEventListener("mousemove", handleMove);
-      };
+      });
     });
+
+    return () => cleanups.forEach(fn => fn());
   }, []);
 
-  return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-hidden' },
+  const allSpotIds = Object.keys(data || {});
 
-    // Header-quote
+  return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-hidden' },
     window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' },
       window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
       window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
     ),
-
-    // Favorieten selectie
     window.React.createElement('section', { className: 'card p-4' },
       window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
       window.React.createElement('div', { className: 'flex flex-col sm:flex-row gap-3' },
@@ -409,8 +408,6 @@ function HomePage() {
         )
       )
     ),
-
-    // Forecast content
     (loading
       ? window.React.createElement('div', { className: 'text-center py-16' }, 'Laden…')
       : spotsToShow().map(spotId => {
@@ -431,7 +428,6 @@ function HomePage() {
                 const conclusion = sms.conclusion || ag.summary;
 
                 return window.React.createElement('div', { key: ag.date, className: `min-w-[320px] p-3 card ${color.classDay}` },
-                  // datum + alert
                   window.React.createElement('div', { className: 'flex justify-between items-start mb-2' },
                     window.React.createElement('div', null,
                       window.React.createElement('div', { className: 'font-semibold' }, new Date(ag.date).toLocaleDateString('nl-NL', { weekday: 'long' })),
@@ -439,11 +435,7 @@ function HomePage() {
                     ),
                     ag.alert ? window.React.createElement('div', { className: 'alert-badge', style: { background: 'var(--accent)' }, title: 'Alert aanwezig' }, '⚠') : null
                   ),
-
-                  // Conclusie
                   window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, conclusion),
-
-                  // Parameters per dagdeel
                   window.React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
                     PART_KEYS.map(part => {
                       const p = ag.parts?.[part] || {};
@@ -463,38 +455,47 @@ function HomePage() {
                         window.React.createElement('div', { className: 'text-sm font-semibold capitalize mb-1' },
                           PART_LABELS[part] || part
                         ),
-
-                      // Hoogte
-window.React.createElement('div', { className: 'text-xs text-slate-400 flex items-center' }, 'Golfhoogte',
-  sms.notes_height && window.React.createElement('span', {
-    className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
-    title: sms.notes_height
-  }, 'info')
-),
-window.React.createElement('div', { className: 'font-semibold' },
-  (p.swell_m ?? ag.swell_m) != null ? `${((p.swell_m ?? ag.swell_m)).toFixed(1)} m` : '—'
-),
-
-// Periode
-window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Swell Periode',
-  sms.notes_period && window.React.createElement('span', {
-    className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
-    title: sms.notes_period
-  }, 'info')
-),
-window.React.createElement('div', { className: 'font-semibold' },
-  (p.period_s ?? ag.period_s) != null ? `${(p.period_s ?? ag.period_s)}s` : '—'
-),
-
-// Wind
-window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Wind',
-  sms.notes_wind && window.React.createElement('span', {
-    className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
-    title: sms.notes_wind
-  }, 'info')
-),
-window.React.createElement('div', { className: 'font-semibold' },
-  `${normalizeWindDir(p.wind_dir || ag.wind_dir) || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
+                        // Hoogte + tooltip
+                        window.React.createElement('div', { className: 'text-xs text-slate-400 flex items-center' }, 'Golfhoogte',
+                          sms.notes_height && window.React.createElement('span', { 
+                            className: 'relative group ml-1 cursor-pointer text-purple-600 material-icons text-sm'
+                          }, 
+                            'info',
+                            window.React.createElement('span', { 
+                              className: 'absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block bg-purple-600 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50'
+                            }, sms.notes_height)
+                          )
+                        ),
+                        window.React.createElement('div', { className: 'font-semibold' },
+                          (p.swell_m ?? ag.swell_m) != null ? `${((p.swell_m ?? ag.swell_m)).toFixed(1)} m` : '—'
+                        ),
+                        // Periode + tooltip
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Swell Periode',
+                          sms.notes_period && window.React.createElement('span', { 
+                            className: 'relative group ml-1 cursor-pointer text-purple-600 material-icons text-sm'
+                          }, 
+                            'info',
+                            window.React.createElement('span', { 
+                              className: 'absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block bg-purple-600 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50'
+                            }, sms.notes_period)
+                          )
+                        ),
+                        window.React.createElement('div', { className: 'font-semibold' },
+                          (p.period_s ?? ag.period_s) != null ? `${(p.period_s ?? ag.period_s)}s` : '—'
+                        ),
+                        // Wind + tooltip
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Wind',
+                          sms.notes_wind && window.React.createElement('span', { 
+                            className: 'relative group ml-1 cursor-pointer text-purple-600 material-icons text-sm'
+                          }, 
+                            'info',
+                            window.React.createElement('span', { 
+                              className: 'absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block bg-purple-600 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50'
+                            }, sms.notes_wind)
+                          )
+                        ),
+                        window.React.createElement('div', { className: 'font-semibold' },
+                          `${normalizeWindDir(p.wind_dir || ag.wind_dir) || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
                         )
                       );
                     })
@@ -511,13 +512,12 @@ window.React.createElement('div', { className: 'font-semibold' },
 /* ===== App ===== */
 function App(){
   const [page, setPage] = useState('home');
-
   return window.React.createElement('div', { className: 'flex min-h-screen' },
     window.React.createElement(Sidebar, { page, setPage }),
-window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0 w-full max-w-full overflow-x-hidden' },
-  page === 'home'
-    ? window.React.createElement(HomePage)
-    : window.React.createElement(CamsPage)
+    window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0 w-full max-w-full overflow-x-hidden' },
+      page === 'home'
+        ? window.React.createElement(HomePage)
+        : window.React.createElement(CamsPage)
     ),
     window.React.createElement(BottomNav, { page, setPage })
   );

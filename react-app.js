@@ -338,6 +338,50 @@ function HomePage() {
   }
 
   const allSpotIds = Object.keys(data || {});
+  // Drag-to-scroll activeren voor forecast sliders
+  useEffect(() => {
+    const sliders = document.querySelectorAll(".draggable-slider");
+    sliders.forEach(slider => {
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      function handleDown(e) {
+        isDown = true;
+        slider.classList.add("cursor-grabbing");
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+      }
+      function handleLeave() {
+        isDown = false;
+        slider.classList.remove("cursor-grabbing");
+      }
+      function handleUp() {
+        isDown = false;
+        slider.classList.remove("cursor-grabbing");
+      }
+      function handleMove(e) {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 1; // scrollsnelheid
+        slider.scrollLeft = scrollLeft - walk;
+      }
+
+      slider.addEventListener("mousedown", handleDown);
+      slider.addEventListener("mouseleave", handleLeave);
+      slider.addEventListener("mouseup", handleUp);
+      slider.addEventListener("mousemove", handleMove);
+
+      // opruimen
+      return () => {
+        slider.removeEventListener("mousedown", handleDown);
+        slider.removeEventListener("mouseleave", handleLeave);
+        slider.removeEventListener("mouseup", handleUp);
+        slider.removeEventListener("mousemove", handleMove);
+      };
+    });
+  }, []);
 
   return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-hidden' },
 

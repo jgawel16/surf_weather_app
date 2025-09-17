@@ -101,13 +101,14 @@ async function loadFromSupabase(){
 /* ===== Sidebar (desktop) ===== */
 function Sidebar({ page, setPage }) {
   return window.React.createElement('aside', { className: 'hidden md:flex flex-col w-40 border-r p-4 gap-6' },
-    window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'h-10 w-auto mb-6' }),
+    window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'h-10 w-auto mb-6 object-contain' }),
     window.React.createElement('nav', { className: 'flex flex-col gap-4 text-sm' },
       ['home','cams'].map(item =>
         window.React.createElement('button', {
           key: item,
           onClick: () => setPage(item),
-          className: `flex items-center gap-2 px-2 py-1 rounded ${page===item?'font-bold text-purple-600':'text-gray-600 hover:text-black'}`
+          className: `flex items-center gap-2 px-2 py-1 rounded transition-colors
+            ${page===item ? 'font-bold text-purple-600' : 'text-gray-600 hover:text-purple-600'}`
         },
           window.React.createElement('span', { className:'material-icons' },
             item === 'home' ? 'home' : 'videocam'
@@ -126,16 +127,16 @@ function BottomNav({ page, setPage }) {
       window.React.createElement('button', {
         key: item,
         onClick: () => setPage(item),
-        className: `${page===item?'text-purple-600':'text-gray-600'} flex flex-col items-center text-xs`
+        className: `${page===item?'text-purple-600':'text-gray-600'} flex flex-col items-center`
       },
-        window.React.createElement('span', { className:'material-icons' },
+        window.React.createElement('span', { className:'material-icons text-2xl' },
           item === 'home' ? 'home' : 'videocam'
-        ),
-        item === 'home' ? 'Home' : 'Cams'
+        )
       )
     )
   );
 }
+
 
 /* ===== Dummy CamsPage ===== */
 function CamsPage() {
@@ -316,10 +317,12 @@ function HomePage() {
 
   return window.React.createElement('div', { className: 'space-y-6 p-6' },
 
-    // Header-quote (zoals Surfnerd voorbeeld)
-    window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center' },
-      window.React.createElement('h1', { className: 'text-xl font-bold mb-2' }, "AI gestuurde surfdata"),
-      window.React.createElement('p', { className: 'italic text-slate-600' }, "Recht op je beeldscherm, niets meer en niets minder.")
+// Bovenaan in HomePage return()
+window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center' },
+  window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
+  window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
+),
+
     ),
 
     // Favorieten selectie

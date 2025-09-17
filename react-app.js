@@ -323,8 +323,6 @@ window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md t
   window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
 ),
 
-    ),
-
     // Favorieten selectie
     window.React.createElement('section', { className: 'card p-4' },
       window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),

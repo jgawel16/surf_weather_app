@@ -315,13 +315,13 @@ function HomePage() {
 
   const allSpotIds = Object.keys(data || {});
 
- return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-hidden' },
+return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-x-hidden' },
 
   // Header-quote
   window.React.createElement('section', { 
     className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' 
   },
-    window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
+    window.React.createElement('h1', { className: 'text-xl font-bold mb-1 break-words' }, "AI gestuurde surfforecast"),
     window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
   ),
 
@@ -418,10 +418,10 @@ function App(){
 
   return window.React.createElement('div', { className: 'flex min-h-screen' },
     window.React.createElement(Sidebar, { page, setPage }),
-    window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0' },
-      page === 'home'
-        ? window.React.createElement(HomePage)
-        : window.React.createElement(CamsPage)
+window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0 w-full max-w-full overflow-x-hidden' },
+  page === 'home'
+    ? window.React.createElement(HomePage)
+    : window.React.createElement(CamsPage)
     ),
     window.React.createElement(BottomNav, { page, setPage })
   );

@@ -338,6 +338,9 @@ function HomePage() {
 
 // Drag/swipe horizontaal voor forecast sliders
 useEffect(() => {
+  // Alleen drag gedrag voor desktop, mobiel gebruikt native swipe
+  if (window.innerWidth < 768) return; 
+
   const sliders = Array.from(document.querySelectorAll('.draggable-slider'));
   if (!sliders.length) return;
 

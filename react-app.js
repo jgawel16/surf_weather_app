@@ -318,7 +318,9 @@ function HomePage() {
   return window.React.createElement('div', { className: 'space-y-6 p-6' },
 
 // Bovenaan in HomePage return()
-window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center' },
+window.React.createElement('section', { 
+  className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' 
+},
   window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
   window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
 ),

@@ -315,15 +315,15 @@ function HomePage() {
 
   const allSpotIds = Object.keys(data || {});
 
-  return window.React.createElement('div', { className: 'space-y-6 p-6' },
+ return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-hidden' },
 
-// Bovenaan in HomePage return()
-window.React.createElement('section', { 
-  className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' 
-},
-  window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
-  window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
-),
+  // Header-quote
+  window.React.createElement('section', { 
+    className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' 
+  },
+    window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
+    window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
+  ),
 
     // Favorieten selectie
     window.React.createElement('section', { className: 'card p-4' },

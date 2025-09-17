@@ -48,6 +48,17 @@ const DEFAULT_PART_VALUES = { swell_m: 0, period_s: 0, wind_bft: 0, wind_dir: nu
 
 /* ===== Utils ===== */
 function degDiff(a, b) { let d = Math.abs(a - b) % 360; if (d > 180) d = 360 - d; return d; }
+function normalizeWindDir(dir) {
+  if (!dir) return null;
+  const MAP = {
+    'N': 'N','NNO': 'NNO','NO': 'NO','ONO': 'ONO',
+    'O': 'O','OZO': 'OZO','ZO': 'ZO','ZZO': 'ZZO',
+    'Z': 'Z','ZZW': 'ZZW','ZW': 'ZW','WZW': 'WZW',
+    'W': 'W','WNW': 'WNW','NW': 'NW','NNW': 'NNW'
+  };
+  const t = String(dir).split(/[\/\s,]+/)[0].toUpperCase();
+  return MAP[t] || dir;
+}
 function parseWindDirString(dir){
   if(!dir) return null;
   const t = String(dir).split(/[\/\s,]+/)[0].toUpperCase();
@@ -405,37 +416,37 @@ function HomePage() {
                           PART_LABELS[part] || part
                         ),
 
-                        // Hoogte
-                        window.React.createElement('div', { className: 'text-xs text-slate-400 flex items-center' }, 'Golfhoogte',
-                          sms.notes_height && window.React.createElement('span', {
-                            className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
-                            title: sms.notes_height
-                          }, 'info')
-                        ),
-                        window.React.createElement('div', { className: 'font-semibold' },
-                          (p.swell_m ?? ag.swell_m) != null ? `${((p.swell_m ?? ag.swell_m)).toFixed(1)} m` : '—'
-                        ),
+                      // Hoogte
+window.React.createElement('div', { className: 'text-xs text-slate-400 flex items-center' }, 'Golfhoogte',
+  sms.notes_height && window.React.createElement('span', {
+    className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
+    title: sms.notes_height
+  }, 'info')
+),
+window.React.createElement('div', { className: 'font-semibold' },
+  (p.swell_m ?? ag.swell_m) != null ? `${((p.swell_m ?? ag.swell_m)).toFixed(1)} m` : '—'
+),
 
-                        // Periode
-                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Swell Periode',
-                          sms.notes_period && window.React.createElement('span', {
-                            className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
-                            title: sms.notes_period
-                          }, 'info')
-                        ),
-                        window.React.createElement('div', { className: 'font-semibold' },
-                          (p.period_s ?? ag.period_s) != null ? `${(p.period_s ?? ag.period_s)}s` : '—'
-                        ),
+// Periode
+window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Swell Periode',
+  sms.notes_period && window.React.createElement('span', {
+    className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
+    title: sms.notes_period
+  }, 'info')
+),
+window.React.createElement('div', { className: 'font-semibold' },
+  (p.period_s ?? ag.period_s) != null ? `${(p.period_s ?? ag.period_s)}s` : '—'
+),
 
-                        // Wind
-                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Wind',
-                          sms.notes_wind && window.React.createElement('span', {
-                            className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
-                            title: sms.notes_wind
-                          }, 'info')
-                        ),
-                        window.React.createElement('div', { className: 'font-semibold' },
-                          `${p.wind_dir || ag.wind_dir || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
+// Wind
+window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Wind',
+  sms.notes_wind && window.React.createElement('span', {
+    className: 'material-icons text-purple-600 text-sm ml-1 cursor-pointer',
+    title: sms.notes_wind
+  }, 'info')
+),
+window.React.createElement('div', { className: 'font-semibold' },
+  `${normalizeWindDir(p.wind_dir || ag.wind_dir) || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
                         )
                       );
                     })
@@ -463,5 +474,37 @@ window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0 w-full max
     window.React.createElement(BottomNav, { page, setPage })
   );
 }
+/* ===== Drag-to-scroll helper ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".draggable-slider").forEach(slider => {
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
+    slider.addEventListener("mousedown", (e) => {
+      isDown = true;
+      slider.classList.add("cursor-grabbing");
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener("mouseleave", () => {
+      isDown = false;
+      slider.classList.remove("cursor-grabbing");
+    });
+
+    slider.addEventListener("mouseup", () => {
+      isDown = false;
+      slider.classList.remove("cursor-grabbing");
+    });
+
+    slider.addEventListener("mousemove", (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 1; // snelheid drag
+      slider.scrollLeft = scrollLeft - walk;
+    });
+  });
+});
 window.ReactDOM.createRoot(document.getElementById('app')).render(window.React.createElement(App));

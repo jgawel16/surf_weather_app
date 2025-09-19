@@ -117,6 +117,7 @@ async function loadFromSupabase(){
 function Sidebar({ page, setPage }) {
   return window.React.createElement('aside', { className: 'hidden md:flex flex-col w-40 border-r p-4 gap-6' },
     window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'h-10 w-auto mb-6 object-contain' }),
+
     window.React.createElement('nav', { className: 'flex flex-col gap-4 text-sm' },
       ['home','cams'].map(item =>
         window.React.createElement('button', {
@@ -124,6 +125,7 @@ function Sidebar({ page, setPage }) {
           onClick: () => setPage(item),
           className: `flex items-center gap-2 px-2 py-1 rounded transition-colors
             ${page===item ? 'font-bold text-purple-600' : 'text-gray-600 hover:text-purple-600'}`
+
         },
           window.React.createElement('span', { className:'material-icons' },
             item === 'home' ? 'home' : 'videocam'

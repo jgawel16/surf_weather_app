@@ -48,6 +48,21 @@ const DEFAULT_PART_VALUES = { swell_m: 0, period_s: 0, wind_bft: 0, wind_dir: nu
 
 /* ===== Utils ===== */
 function degDiff(a, b) { let d = Math.abs(a - b) % 360; if (d > 180) d = 360 - d; return d; }
+function normalizeWindDir(dir) {
+  if (!dir) return null;
+  const t = String(dir).trim().toUpperCase();
+  const MAP = {
+    'N': 'N','NOORD': 'N','NNO': 'NNO','NOORDNOORDOOST': 'NNO',
+    'NO': 'NO','NOORDOOST': 'NO','ONO': 'ONO','OOSTNOORDOOST': 'ONO',
+    'O': 'O','OOST': 'O','OZO': 'OZO','OOSTZUIDOOST': 'OZO',
+    'ZO': 'ZO','ZUIDOOST': 'ZO','ZZO': 'ZZO','ZUIDZUIDOOST': 'ZZO',
+    'Z': 'Z','ZUID': 'Z','ZZW': 'ZZW','ZUIDZUIDWEST': 'ZZW',
+    'ZW': 'ZW','ZUIDWEST': 'ZW','WZW': 'WZW','WESTZUIDWEST': 'WZW',
+    'W': 'W','WEST': 'W','WNW': 'WNW','WESTNOORDWEST': 'WNW',
+    'NW': 'NW','NOORDWEST': 'NW','NNW': 'NNW','NOORDNOORDWEST': 'NNW'
+  };
+  return MAP[t] || dir;
+}
 function parseWindDirString(dir){
   if(!dir) return null;
   const t = String(dir).split(/[\/\s,]+/)[0].toUpperCase();
@@ -98,16 +113,19 @@ async function loadFromSupabase(){
   return payload;
 }
 
-/* ===== Sidebar (desktop) ===== */
+/* ===== Sidebar ===== */
 function Sidebar({ page, setPage }) {
   return window.React.createElement('aside', { className: 'hidden md:flex flex-col w-40 border-r p-4 gap-6' },
-    window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'h-10 w-auto mb-6' }),
+    window.React.createElement('img', { src: './Ingezoomd logo.png', alt: 'Logo', className: 'h-10 w-auto mb-6 object-contain' }),
+
     window.React.createElement('nav', { className: 'flex flex-col gap-4 text-sm' },
       ['home','cams'].map(item =>
         window.React.createElement('button', {
           key: item,
           onClick: () => setPage(item),
-          className: `flex items-center gap-2 px-2 py-1 rounded ${page===item?'font-bold text-purple-600':'text-gray-600 hover:text-black'}`
+          className: `flex items-center gap-2 px-2 py-1 rounded transition-colors
+            ${page===item ? 'font-bold text-purple-600' : 'text-gray-600 hover:text-purple-600'}`
+
         },
           window.React.createElement('span', { className:'material-icons' },
             item === 'home' ? 'home' : 'videocam'
@@ -119,19 +137,18 @@ function Sidebar({ page, setPage }) {
   );
 }
 
-/* ===== BottomNav (mobiel) ===== */
+/* ===== BottomNav ===== */
 function BottomNav({ page, setPage }) {
   return window.React.createElement('nav', { className: 'md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2' },
     ['home','cams'].map(item =>
       window.React.createElement('button', {
         key: item,
         onClick: () => setPage(item),
-        className: `${page===item?'text-purple-600':'text-gray-600'} flex flex-col items-center text-xs`
+        className: `${page===item?'text-purple-600':'text-gray-600'} flex flex-col items-center`
       },
-        window.React.createElement('span', { className:'material-icons' },
+        window.React.createElement('span', { className:'material-icons text-2xl' },
           item === 'home' ? 'home' : 'videocam'
-        ),
-        item === 'home' ? 'Home' : 'Cams'
+        )
       )
     )
   );
@@ -233,6 +250,14 @@ function HomePage() {
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
 
+  // Dummy sms-data
+  const dummySms = {
+    conclusion: "Goede surfmomenten vandaag, vooral in Zeeland.",
+    notes_height: "Golfhoogte beter in Domburg, elders klein.",
+    notes_wind: "Wind ZW 4 bft, wat rommelig.",
+    notes_period: "Periode nog kort, betere sets later."
+  };
+
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -292,7 +317,8 @@ function HomePage() {
       wind_dir,
       wind_type,
       score,
-      summary: buildConclusion({ score })
+      summary: buildConclusion({ score }),
+      sms: dummySms
     };
   }
 
@@ -312,17 +338,72 @@ function HomePage() {
     return bestSpot ? [bestSpot, ...active.filter(s => s !== bestSpot)] : active;
   }
 
+// Drag/swipe horizontaal voor forecast sliders
+useEffect(() => {
+  // Alleen drag gedrag voor desktop, mobiel gebruikt native swipe
+  if (window.innerWidth < 768) return; 
+
+  const sliders = Array.from(document.querySelectorAll('.draggable-slider'));
+  if (!sliders.length) return;
+
+  const cleanups = [];
+  sliders.forEach(slider => {
+    slider.style.touchAction = 'pan-y';
+    slider.style.userSelect = 'none';
+
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+
+    const onDown = (e) => {
+      isDown = true;
+      startX = e.pageX || e.touches[0].pageX;
+      scrollLeft = slider.scrollLeft;
+      slider.classList.add('cursor-grabbing');
+    };
+
+    const onMove = (e) => {
+      if (!isDown) return;
+      const x = e.pageX || (e.touches && e.touches[0].pageX);
+      const walk = x - startX;
+      slider.scrollLeft = scrollLeft - walk;
+    };
+
+    const onUp = () => {
+      isDown = false;
+      slider.classList.remove('cursor-grabbing');
+    };
+
+    slider.addEventListener('mousedown', onDown);
+    slider.addEventListener('mousemove', onMove);
+    slider.addEventListener('mouseup', onUp);
+    slider.addEventListener('mouseleave', onUp);
+
+    slider.addEventListener('touchstart', onDown, { passive: true });
+    slider.addEventListener('touchmove', onMove, { passive: true });
+    slider.addEventListener('touchend', onUp);
+
+    cleanups.push(() => {
+      slider.removeEventListener('mousedown', onDown);
+      slider.removeEventListener('mousemove', onMove);
+      slider.removeEventListener('mouseup', onUp);
+      slider.removeEventListener('mouseleave', onUp);
+      slider.removeEventListener('touchstart', onDown);
+      slider.removeEventListener('touchmove', onMove);
+      slider.removeEventListener('touchend', onUp);
+    });
+  });
+
+  return () => cleanups.forEach(fn => fn());
+}, [data, selectedSpots, filterBest]);
+
   const allSpotIds = Object.keys(data || {});
 
-  return window.React.createElement('div', { className: 'space-y-6 p-6' },
-
-    // Header-quote (zoals Surfnerd voorbeeld)
-    window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center' },
-      window.React.createElement('h1', { className: 'text-xl font-bold mb-2' }, "AI gestuurde surfdata"),
-      window.React.createElement('p', { className: 'italic text-slate-600' }, "Recht op je beeldscherm, niets meer en niets minder.")
+  return window.React.createElement('div', { className: 'space-y-6 p-6 w-full max-w-full overflow-hidden' },
+    window.React.createElement('section', { className: 'bg-slate-50 p-6 rounded-md text-center w-full max-w-full overflow-hidden' },
+      window.React.createElement('h1', { className: 'text-xl font-bold mb-1' }, "AI gestuurde surfforecast"),
+      window.React.createElement('p', { className: 'italic text-slate-600' }, "Door Job & Jelle")
     ),
-
-    // Favorieten selectie
     window.React.createElement('section', { className: 'card p-4' },
       window.React.createElement('div', { className: 'mb-2 text-sm text-slate-700' }, 'Selecteer je favoriete spots:'),
       window.React.createElement('div', { className: 'flex flex-col sm:flex-row gap-3' },
@@ -340,8 +421,6 @@ function HomePage() {
         )
       )
     ),
-
-    // Forecast content
     (loading
       ? window.React.createElement('div', { className: 'text-center py-16' }, 'Laden…')
       : spotsToShow().map(spotId => {
@@ -358,6 +437,9 @@ function HomePage() {
             window.React.createElement('div', { className: 'overflow-x-auto h-scroll flex gap-4 py-2 draggable-slider' },
               aggs.map(ag => {
                 const color = mapScoreToColor(ag.score);
+                const sms = ag.sms || {};
+                const conclusion = sms.conclusion || ag.summary;
+
                 return window.React.createElement('div', { key: ag.date, className: `min-w-[320px] p-3 card ${color.classDay}` },
                   window.React.createElement('div', { className: 'flex justify-between items-start mb-2' },
                     window.React.createElement('div', null,
@@ -366,7 +448,7 @@ function HomePage() {
                     ),
                     ag.alert ? window.React.createElement('div', { className: 'alert-badge', style: { background: 'var(--accent)' }, title: 'Alert aanwezig' }, '⚠') : null
                   ),
-                  window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, ag.summary),
+                  window.React.createElement('div', { className: 'mb-3 text-sm text-slate-700' }, conclusion),
                   window.React.createElement('div', { className: 'grid grid-cols-3 gap-3' },
                     PART_KEYS.map(part => {
                       const p = ag.parts?.[part] || {};
@@ -381,21 +463,52 @@ function HomePage() {
                       const windKmh = (p.wind_kmh != null) ? Math.round(p.wind_kmh)
                                     : (p.wind_bft != null ? bftToKmh(p.wind_bft)
                                     : (ag.wind_bft != null ? bftToKmh(ag.wind_bft) : null));
+
                       return window.React.createElement('div', { key: part, className: `p-3 ${partColor.classPart}` },
                         window.React.createElement('div', { className: 'text-sm font-semibold capitalize mb-1' },
                           PART_LABELS[part] || part
                         ),
-                        window.React.createElement('div', { className: 'text-xs text-slate-400' }, 'Golfhoogte'),
+                        // Hoogte + tooltip
+                        window.React.createElement('div', { className: 'text-xs text-slate-400 flex items-center' }, 'Golfhoogte',
+                          sms.notes_height && window.React.createElement('span', { 
+                            className: 'relative group ml-1 cursor-pointer text-purple-600 material-icons text-sm'
+                          }, 
+                            'info',
+                            window.React.createElement('span', { 
+                              className: 'absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block bg-purple-600 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50'
+                            }, sms.notes_height)
+                          )
+                        ),
                         window.React.createElement('div', { className: 'font-semibold' },
                           (p.swell_m ?? ag.swell_m) != null ? `${((p.swell_m ?? ag.swell_m)).toFixed(1)} m` : '—'
                         ),
-                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Swell Periode'),
+                        // Periode + tooltip
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Swell Periode',
+                          sms.notes_period && window.React.createElement('span', { 
+                            className: 'relative group ml-1 cursor-pointer text-purple-600 material-icons text-sm'
+                          }, 
+                            'info',
+                            window.React.createElement('span', { 
+                              className: 'absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block bg-purple-600 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50'
+                            }, sms.notes_period)
+                          )
+                        ),
                         window.React.createElement('div', { className: 'font-semibold' },
                           (p.period_s ?? ag.period_s) != null ? `${(p.period_s ?? ag.period_s)}s` : '—'
                         ),
-                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400' }, 'Wind'),
+                        // Wind + tooltip
+                        window.React.createElement('div', { className: 'mt-2 text-xs text-slate-400 flex items-center' }, 'Wind',
+                          sms.notes_wind && window.React.createElement('span', { 
+                            className: 'relative group ml-1 cursor-pointer text-purple-600 material-icons text-sm'
+                          }, 
+                            'info',
+                            window.React.createElement('span', { 
+                              className: 'absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block bg-purple-600 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50'
+                            }, sms.notes_wind)
+                          )
+                        ),
                         window.React.createElement('div', { className: 'font-semibold' },
-                          `${p.wind_dir || ag.wind_dir || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
+                          `${normalizeWindDir(p.wind_dir || ag.wind_dir) || '—'}${windKmh ? ` • ${windKmh} km/u` : ''}`
                         )
                       );
                     })
@@ -412,10 +525,9 @@ function HomePage() {
 /* ===== App ===== */
 function App(){
   const [page, setPage] = useState('home');
-
   return window.React.createElement('div', { className: 'flex min-h-screen' },
     window.React.createElement(Sidebar, { page, setPage }),
-    window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0' },
+    window.React.createElement('main', { className: 'flex-1 pb-12 md:pb-0 w-full max-w-full overflow-x-hidden' },
       page === 'home'
         ? window.React.createElement(HomePage)
         : window.React.createElement(CamsPage)

@@ -2,11 +2,14 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <title>Surf Forecast — 7-daags</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <!-- React + ReactDOM (UMD globals: React, ReactDOM) -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -19,8 +22,9 @@
     }
     body {
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-      color:#000; background:#fff;
+      color:#000; background:#fff; margin:0; padding:0; overflow-x:hidden;
     }
+
     .h-scroll { scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; cursor:grab; }
     .h-item { scroll-snap-align:start; }
     .card { border:1px solid rgba(15,23,42,.06); background:#fff; border-radius:12px; }

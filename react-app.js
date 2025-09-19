@@ -203,7 +203,6 @@ function aggregateOpenMeteoArray(records){
   return result;
 }
 
-
 /* ===== Utils ===== */
 function degDiff(a, b) { let d = Math.abs(a - b) % 360; if (d > 180) d = 360 - d; return d; }
 function normalizeWindDir(dir) {

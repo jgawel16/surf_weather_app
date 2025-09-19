@@ -77,7 +77,6 @@ def _deg_to_compass(deg: float | None) -> str | None:
     idx = int(((deg % 360) / 22.5) + 0.5) % len(directions)
     return directions[idx]
 
-
 def _hour_to_daypart(hour: float | int | None) -> str | None:
     if hour is None or pd.isna(hour):
         return None

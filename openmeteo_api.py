@@ -18,8 +18,26 @@ def get_openmeteo_data():
     params = {
         "latitude": [52.4693, 52.1066],
         "longitude": [4.556, 4.2654],
-        "hourly": ["wave_height", "wave_direction", "wave_period", "wind_wave_peak_period", "wind_wave_height", "wind_wave_direction", "wind_wave_period", "swell_wave_height", "swell_wave_period", "swell_wave_direction", "swell_wave_peak_period", "secondary_swell_wave_height", "secondary_swell_wave_period", "secondary_swell_wave_direction", "sea_surface_temperature"],
-        "forecast_days": 3
+        "hourly": [
+            "wave_height",
+            "wave_direction",
+            "wave_period",
+            "wind_wave_peak_period",
+            "wind_wave_height",
+            "wind_wave_direction",
+            "wind_wave_period",
+            "swell_wave_height",
+            "swell_wave_period",
+            "swell_wave_direction",
+            "swell_wave_peak_period",
+            "secondary_swell_wave_height",
+            "secondary_swell_wave_period",
+            "secondary_swell_wave_direction",
+            "sea_surface_temperature",
+            "wind_speed_10m",
+            "wind_direction_10m",
+        ],
+        "forecast_days": 3,
     }
     responses = openmeteo.weather_api(url, params=params)
 
@@ -48,6 +66,8 @@ def get_openmeteo_data():
         hourly_secondary_swell_wave_period = hourly.Variables(12).ValuesAsNumpy()
         hourly_secondary_swell_wave_direction = hourly.Variables(13).ValuesAsNumpy()
         hourly_sea_surface_temperature = hourly.Variables(14).ValuesAsNumpy()
+        hourly_wind_speed_10m = hourly.Variables(15).ValuesAsNumpy()
+        hourly_wind_direction_10m = hourly.Variables(16).ValuesAsNumpy()
         
         hourly_data = {"date": pd.date_range(
             start = pd.to_datetime(hourly.Time(), unit = "s", utc = True),
@@ -71,6 +91,8 @@ def get_openmeteo_data():
         hourly_data["secondary_swell_wave_period"] = hourly_secondary_swell_wave_period
         hourly_data["secondary_swell_wave_direction"] = hourly_secondary_swell_wave_direction
         hourly_data["sea_surface_temperature"] = hourly_sea_surface_temperature
+        hourly_data["wind_speed_10m"] = hourly_wind_speed_10m
+        hourly_data["wind_direction_10m"] = hourly_wind_direction_10m
         
         hourly_dataframe = pd.DataFrame(data = hourly_data)
         dfs[location] = hourly_dataframe

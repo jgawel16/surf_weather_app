@@ -10,6 +10,7 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY")
 SUPABASE_EMAIL = os.getenv("SUPABASE_EMAIL")
 SUPABASE_PASSWORD = os.getenv("SUPABASE_PASSWORD")
 
+
 # === Auth: access token ophalen (machine user) =====================
 def get_access_token():
     url = f"{SUPABASE_URL}/auth/v1/token?grant_type=password"
@@ -21,6 +22,7 @@ def get_access_token():
     r = requests.post(url, headers=headers, json=payload, timeout=30)
     r.raise_for_status()
     return r.json()["access_token"]
+
 
 # === RPC wrappers ===================================================
 def rpc_get_unprocessed(limit=10, access_token=None):
@@ -34,6 +36,7 @@ def rpc_get_unprocessed(limit=10, access_token=None):
     r = requests.post(url, headers=headers, json=payload, timeout=30)
     r.raise_for_status()
     return r.json()  # [{id, body}, ...]
+
 
 def rpc_set_body_processed(row_id, value, access_token=None, as_text=False):
     fn = "set_body_processed_text" if as_text else "set_body_processed"
@@ -49,6 +52,7 @@ def rpc_set_body_processed(row_id, value, access_token=None, as_text=False):
     r.raise_for_status()
     # RPC returns no body (void)
     return True
+
 
 def rpc_set_openmeteo(row_id, value, access_token=None, as_text=False):
     url = f"{SUPABASE_URL}/rest/v1/rpc/set_openmeteo"

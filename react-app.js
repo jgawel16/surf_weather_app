@@ -44,7 +44,20 @@ const getSpotMeta = (id) =>
 
 const PART_KEYS = ["ochtend", "middag", "avond"];
 const PART_LABELS = { ochtend: "Ochtend", middag: "Middag", avond: "Avond" };
-const DEFAULT_PART_VALUES = { swell_m: 0, period_s: 0, wind_bft: 0, wind_dir: null };
+
+function safeNumber(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
+function parseJSONSafe(value) {
+  if (value == null) return null;
+  if (typeof value === 'object') return value;
+  if (typeof value === 'string') {
+    try { return JSON.parse(value); } catch (err) { console.warn('Kon JSON niet parsen', err); }
+  }
+  return null;
+}
 
 /* ===== Utils ===== */
 function degDiff(a, b) { let d = Math.abs(a - b) % 360; if (d > 180) d = 360 - d; return d; }
@@ -71,7 +84,7 @@ function parseWindDirString(dir){
 }
 function computeWindType(spotMeta, windDirStr){
   const deg = parseWindDirString(windDirStr);
-  if (deg === null) return 'unknown';
+  if (deg === null) return null;
   const diff = degDiff(deg, spotMeta.shoreBearing ?? 260);
   if (diff <= 45) return 'onshore';
   if (Math.abs(diff - 180) <= 45) return 'offshore';
@@ -107,10 +120,40 @@ async function loadFromSupabase(){
   const { data, error } = await supa.rpc(RPC_NAME);
   if (error) throw error;
   const row = Array.isArray(data) && data.length ? data[0] : null;
-  if (!row || row.body_processed == null) return {};
-  const payload = (typeof row.body_processed === "string") ? JSON.parse(row.body_processed) : row.body_processed;
-  Object.keys(payload).forEach(k => payload[k].sort((a,b) => (a.date||"").localeCompare(b.date||"")));
-  return payload;
+  if (!row) return {};
+
+  const payload = parseJSONSafe(row.body_processed) || {};
+  Object.keys(payload).forEach(k => {
+    if (Array.isArray(payload[k])) {
+      payload[k].sort((a,b) => (a?.date||"").localeCompare(b?.date||""));
+    }
+  });
+
+  const meteoRaw = parseJSONSafe(row.openmeteo);
+  const meteoAgg = (meteoRaw && typeof meteoRaw === 'object' && !Array.isArray(meteoRaw)) ? meteoRaw : {};
+  const merged = { ...payload };
+
+  Object.entries(meteoAgg).forEach(([spotId, days]) => {
+    const existing = Array.isArray(merged[spotId]) ? [...merged[spotId]] : [];
+    (Array.isArray(days) ? days : []).forEach(day => {
+      if (!day || !day.date) return;
+      const idx = existing.findIndex(d => d?.date === day.date);
+      if (idx >= 0) {
+        const current = existing[idx] || {};
+        existing[idx] = {
+          ...current,
+          parts: { ...(current.parts || {}), ...(day.parts || {}) },
+          source: day.source || current.source
+        };
+      } else {
+        existing.push({ date: day.date, parts: day.parts || {}, source: day.source });
+      }
+    });
+    existing.sort((a,b) => (a?.date||"").localeCompare(b?.date||""));
+    merged[spotId] = existing;
+  });
+
+  return merged;
 }
 
 /* ===== Sidebar ===== */
@@ -298,13 +341,20 @@ function HomePage() {
 
   function computeDayAgg(spotId, dayEntry){
     const meta = getSpotMeta(spotId);
-    const partsArr = PART_KEYS.map(k =>
-      (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : DEFAULT_PART_VALUES
-    );
-    const swell_avg = partsArr.reduce((a,p) => a + (p.swell_m||0), 0) / partsArr.length;
-    const period_avg = Math.round(partsArr.reduce((a,p) => a + (p.period_s||0), 0) / partsArr.length);
-    const wind_bft_avg = Math.round(partsArr.reduce((a,p) => a + (p.wind_bft||0), 0) / partsArr.length);
-    const wind_dir = partsArr[1]?.wind_dir || partsArr[0]?.wind_dir || partsArr[2]?.wind_dir || null;
+    const partsByKey = PART_KEYS.map(k => (dayEntry.parts && dayEntry.parts[k]) ? dayEntry.parts[k] : null);
+    const validParts = partsByKey.filter(Boolean);
+    const swellValues = validParts.map(p => safeNumber(p.swell_m)).filter(v => v != null);
+    const periodValues = validParts.map(p => safeNumber(p.period_s)).filter(v => v != null);
+    const windValues = validParts.map(p => safeNumber(p.wind_bft)).filter(v => v != null);
+
+    const swell_avg = swellValues.length ? swellValues.reduce((a, b) => a + b, 0) / swellValues.length : 0;
+    const period_avg = periodValues.length ? Math.round(periodValues.reduce((a, b) => a + b, 0) / periodValues.length) : 0;
+    const wind_bft_avg = windValues.length ? Math.round(windValues.reduce((a, b) => a + b, 0) / windValues.length) : null;
+    const wind_dir =
+      dayEntry.parts?.["middag"]?.wind_dir ||
+      dayEntry.parts?.["ochtend"]?.wind_dir ||
+      dayEntry.parts?.["avond"]?.wind_dir ||
+      null;
     const wind_type = computeWindType(meta, wind_dir);
     const score = computeScore({ swell_m: swell_avg, period_s: period_avg, wind_bft: wind_bft_avg, wind_type });
     return {
@@ -313,9 +363,9 @@ function HomePage() {
       alert: !!dayEntry.alert,
       swell_m: isFinite(swell_avg) ? +swell_avg.toFixed(2) : null,
       period_s: isFinite(period_avg) ? period_avg : null,
-      wind_bft: isFinite(wind_bft_avg) ? wind_bft_avg : null,
-      wind_dir,
-      wind_type,
+      wind_bft: Number.isFinite(wind_bft_avg) ? wind_bft_avg : null,
+      wind_dir: wind_dir || null,
+      wind_type: wind_type || null,
       score,
       summary: buildConclusion({ score }),
       sms: dummySms

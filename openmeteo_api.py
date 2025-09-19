@@ -20,6 +20,7 @@ def get_openmeteo_data():
         "latitude": [52.4693, 52.1066],
         "longitude": [4.556, 4.2654],
         "hourly": ["wave_height", "wave_direction", "wave_period", "wind_wave_peak_period", "wind_wave_height", "wind_wave_direction", "wind_wave_period", "swell_wave_height", "swell_wave_period", "swell_wave_direction", "swell_wave_peak_period", "secondary_swell_wave_height", "secondary_swell_wave_period", "secondary_swell_wave_direction", "sea_surface_temperature"],
+        "forecast_days": 3
     }
     responses = openmeteo.weather_api(url, params=params)
 
@@ -93,6 +94,9 @@ def get_openmeteo_data():
     ]
 
     json_output = to_json_array(dfs, tz, dutch_days, field_order)
+
+    return json_output  # is nu een list, geen string
+
 
     return json_output
 

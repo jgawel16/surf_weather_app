@@ -1,8 +1,8 @@
 name: Add body_processed to new Supabase records
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # → elke uur op minuut 0
+  #schedule:
+  #  - cron: '0 * * * *'   → elke uur op minuut 0
   workflow_dispatch:      # → optioneel: handmatig starten
 
 jobs:
